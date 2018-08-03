@@ -57,6 +57,12 @@ public class MessageThread extends Thread {
 					
 				case BYTE_START_LIVEFEED:
 					System.out.println("@@@@@@@@@@@@@@@@@Live Feed on kela..........................");
+					try {
+						Main.exchangeFrame = new ExchangeFrame();
+					} catch (IOException e) {
+						e.printStackTrace();
+						System.exit(1);
+					}
 					Main.exchangeFrame.start();
 					break;
 				/*case BYTE_START_LISTEN:

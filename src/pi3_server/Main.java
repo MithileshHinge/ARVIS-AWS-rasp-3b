@@ -34,12 +34,7 @@ public class Main {
 		MessageThread msgThread = new MessageThread();
 		msgThread.start();
 		
-		try {
-			exchangeFrame = new ExchangeFrame();
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		
 	}
 
 }

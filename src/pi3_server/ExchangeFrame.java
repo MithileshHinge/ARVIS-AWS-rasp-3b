@@ -48,8 +48,8 @@ public class ExchangeFrame extends Thread{
 			while(true){
                 long time1 = System.currentTimeMillis();
                 
-                outSys.write(1);
-                outSys.flush();
+                outMob.write(1);
+                outMob.flush();
                 
                 try{	
                 	byte[] buf = new byte[64000];
@@ -81,9 +81,14 @@ public class ExchangeFrame extends Thread{
 					sockMob.close();
 				if (sockSys != null)
 					sockSys.close();
+				ssSys.close();
+				ssMob.close();
+				dsSys.close();
+				dsMob.close();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
+			
 			e.printStackTrace();
 		}
 	}
