@@ -7,10 +7,14 @@ public class Main {
 	public static final int 
 			PORT_MESSAGE_SYS=6676,
 			PORT_MESSAGE_MOB=7676,
+			
 			PORT_NOTIF_SYS=6667,
 			PORT_NOTIF_FRAME_SYS=6669,
+			PORT_NOTIF_VIDEO_SYS=6668,
 			PORT_NOTIF_MOB=7667,
 			PORT_NOTIF_FRAME_MOB=7669,
+			PORT_NOTIF_VIDEO_MOB=7668,
+			
 			PORT_LIVEFEED_TCP_SYS=6666,
 			PORT_LIVEFEED_UDP_SYS=6663,
 			PORT_LIVEFEED_TCP_MOB=7666,
@@ -33,6 +37,12 @@ public class Main {
 	public static void main(String[] args) {
 		MessageThread msgThread = new MessageThread();
 		msgThread.start();
+		
+		ExchangeNotif exchgNotif = new ExchangeNotif();
+		exchgNotif.start();
+		
+		ExchangeVideo exchgVdo = new ExchangeVideo();
+		exchgVdo.start();
 		
 		try {
 			exchangeFrame = new ExchangeFrame();
