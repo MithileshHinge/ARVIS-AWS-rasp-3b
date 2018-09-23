@@ -2,13 +2,15 @@ package pi3_server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class MessageThread extends Thread {
 
-	private ServerSocket ssSystem, ssMob;
-	private Socket sockSystem, sockMob;
+	private ServerSocket ssSys, ssMob;
+	private Socket sockSys, sockMob;
 	
 	private static final byte 
 			BYTE_SURV_MODE_ON = 1, 
@@ -20,10 +22,12 @@ public class MessageThread extends Thread {
 			BYTE_START_LIVEFEED=2,
 			BYTE_STOP_LIVEFEED=4;
 	
-	MessageThread(){
+	MessageThread(InetAddress addrSys, InetAddress addrMob){
 		try {
-			ssSystem = new ServerSocket(Main.PORT_MESSAGE_SYS);
+			ssSys = new ServerSocket();
+			ssSys.bind(new InetSocketAddress(addrSys, Main.PORT_MESSAGE_SYS));
 			ssMob = new ServerSocket(Main.PORT_MESSAGE_MOB);
+			ssMob.bind(new InetSocketAddress(addrMob, Main.PORT_MESSAGE_MOB));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -34,8 +38,8 @@ public class MessageThread extends Thread {
 		System.out.println("Message thread started...");
 		while(true){
 			try {
+				sockSys = ssSys.accept();
 				sockMob = ssMob.accept();
-				sockSystem = ssSystem.accept();
 				
 				InputStream mobIn = sockMob.getInputStream();
 				int msg = mobIn.read();
@@ -57,7 +61,15 @@ public class MessageThread extends Thread {
 					
 				case BYTE_START_LIVEFEED:
 					System.out.println("@@@@@@@@@@@@@@@@@Live Feed on kela..........................");
-					Main.exchangeFrame.start();
+					
+					try {
+						ExchangeFrame exchangeFrame = new ExchangeFrame(sockSys.getInetAddress(), sockMob.getInetAddress());
+						exchangeFrame.start();
+					} catch (IOException e) {
+						e.printStackTrace();
+						break;
+					}
+					
 					break;
 				/*case BYTE_START_LISTEN:
 					System.out.println("@@@@@@@@@@@@@@@@@Listen on kela.............................");
@@ -76,15 +88,15 @@ public class MessageThread extends Thread {
 				
 				}
 				
-				sockSystem.getOutputStream().write(msg);
-				sockSystem.getOutputStream().flush();
+				sockSys.getOutputStream().write(msg);
+				sockSys.getOutputStream().flush();
 				
-				sockSystem.getInputStream().read(); //TODO: Error handling can be implemented here (different bytes received for different errors/response, e.g. 1=SUCCESS)
+				sockSys.getInputStream().read(); //TODO: Error handling can be implemented here (different bytes received for different errors/response, e.g. 1=SUCCESS)
 				
 				sockMob.getOutputStream().write(1);
 				sockMob.getOutputStream().flush();
 				
-				sockSystem.close();
+				sockSys.close();
 				sockMob.close();
 				
 			} catch (IOException e) {

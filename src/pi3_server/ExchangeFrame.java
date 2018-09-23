@@ -17,12 +17,16 @@ public class ExchangeFrame extends Thread{
 	private DatagramSocket dsSys, dsMob;
 	private Socket sockSys, sockMob;
 	
-	public ExchangeFrame() throws IOException{
-		ssSys = new ServerSocket(Main.PORT_LIVEFEED_TCP_SYS);
-		ssMob = new ServerSocket(Main.PORT_LIVEFEED_TCP_MOB);
+	public ExchangeFrame(InetAddress addrSys, InetAddress addrMob) throws IOException{
+		ssSys = new ServerSocket();
+		ssSys.bind(new InetSocketAddress(addrSys, Main.PORT_LIVEFEED_TCP_SYS));
+		ssMob = new ServerSocket();
+		ssMob.bind(new InetSocketAddress(addrMob, Main.PORT_LIVEFEED_TCP_MOB));
 		
-		dsSys = new DatagramSocket(Main.PORT_LIVEFEED_UDP_SYS);
-		dsMob = new DatagramSocket(Main.PORT_LIVEFEED_UDP_MOB);
+		dsSys = new DatagramSocket();
+		dsSys.bind(new InetSocketAddress(addrSys, Main.PORT_LIVEFEED_UDP_SYS));
+		dsMob = new DatagramSocket();
+		dsMob.bind(new InetSocketAddress(addrMob, Main.PORT_LIVEFEED_UDP_MOB));
 	}
 	
 	public void run(){
@@ -48,8 +52,8 @@ public class ExchangeFrame extends Thread{
 			while(true){
                 long time1 = System.currentTimeMillis();
                 
-                outSys.write(1);
-                outSys.flush();
+                outMob.write(1);
+                outMob.flush();
                 
                 try{	
                 	byte[] buf = new byte[64000];
@@ -81,9 +85,14 @@ public class ExchangeFrame extends Thread{
 					sockMob.close();
 				if (sockSys != null)
 					sockSys.close();
+				ssSys.close();
+				ssMob.close();
+				dsSys.close();
+				dsMob.close();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
+			
 			e.printStackTrace();
 		}
 	}
