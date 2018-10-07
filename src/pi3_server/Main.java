@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,8 +38,13 @@ public class Main {
 			BYTE_LIGHT_CHANGE = 6;
 
 	public static ExchangeFrame exchangeFrame;
-	public static ConcurrentHashMap<String, MergeThread> mergeThreadsMap = new ConcurrentHashMap<>();
+	//public static ConcurrentHashMap<String, MergeThread> mergeThreadsMap = new ConcurrentHashMap<>();
+	//public static ConcurrentHashMap<InetAddress, Socket> mobIP2connMobSock = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetAddress, InetAddress> mobIP2sysIP = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetAddress, InetAddress> sysIP2mobIP = new ConcurrentHashMap<InetAddress, InetAddress>();
 	public static ConcurrentHashMap<String, ConnectSysThread> connSysThreadsMap = new ConcurrentHashMap<>();
+	//public static ConcurrentHashMap<String, InetAddress> hashID2sysIPMap= new ConcurrentHashMap<>();
+	//public static ConcurrentHashMap<String, InetAddress> hashID2mobIPMap= new ConcurrentHashMap<>();
 	public static UserDatabaseHandler db = new UserDatabaseHandler();
 	private static ServerSocket connSysSS = null;
 	private static ServerSocket connMobSS = null;
@@ -65,6 +71,29 @@ public class Main {
 				
 			}
 		}).start();
+		
+		try {
+			ServerSockThread servSockMsgSysThread = new ServerSockThread(PORT_MESSAGE_SYS);
+			ServerSockThread servSockMsgMobThread = new ServerSockThread(PORT_MESSAGE_MOB);
+			ServerSockThread servSockLivefeedSysThread = new ServerSockThread(PORT_LIVEFEED_TCP_SYS);
+			ServerSockThread servSockLivefeedMobThread = new ServerSockThread(PORT_LIVEFEED_TCP_MOB);
+			
+			servSockMsgSysThread.start();
+			servSockMsgMobThread.start();
+			servSockLivefeedSysThread.start();
+			servSockLivefeedMobThread.start();
+		} catch (IOException e2) {
+			e2.printStackTrace();
+			return;
+		}
+		
+		try {
+			exchangeFrame = new ExchangeFrame();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			return;
+		}
+		exchangeFrame.start();
 		
 		while(true){
 			

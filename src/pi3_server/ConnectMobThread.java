@@ -5,11 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.CountDownLatch;
 
 class ConnectMobThread extends Thread{
 	private Socket connMobSock;
 	
 	ConnectSysThread connSysThread;
+	public CountDownLatch latch = new CountDownLatch(1);
+	public Socket sysMessageSock, mobMessageSock;
 	
 	ConnectMobThread(Socket connMobSock){
 		this.connMobSock = connMobSock;
@@ -101,11 +104,13 @@ class ConnectMobThread extends Thread{
 			mergeThread.mobIP = connMobSock.getInetAddress();
 			mergeThread.latch.countDown();*/
 			
+			Main.mobIP2sysIP.put(connMobSock.getInetAddress(), connSysThread.connSysSock.getInetAddress());
+			Main.sysIP2mobIP.put(connSysThread.connSysSock.getInetAddress(), connMobSock.getInetAddress());
 			
-			MessageThread messageThread = new MessageThread(connSysThread.connSysSock.getInetAddress(), connMobSock.getInetAddress());
-			messageThread.start();
+			//MessageThread messageThread = new MessageThread(sysMessageSock, mobMessageSock);
+			//messageThread.start();
 			
-			outMob.write(9);  // Connection successful, message thread started
+			outMob.write(9);  // Connection successful
 			
 			while(true){
 				inMob.read();

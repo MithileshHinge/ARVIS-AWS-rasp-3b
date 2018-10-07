@@ -9,7 +9,7 @@ import java.net.Socket;
 
 public class MessageThread extends Thread {
 
-	private ServerSocket ssSys, ssMob;
+	//private ServerSocket ssSys, ssMob;
 	private Socket sockSys, sockMob;
 	
 	private static final byte 
@@ -22,24 +22,25 @@ public class MessageThread extends Thread {
 			BYTE_START_LIVEFEED=2,
 			BYTE_STOP_LIVEFEED=4;
 	
-	MessageThread(InetAddress addrSys, InetAddress addrMob){
-		try {
+	MessageThread(Socket sockSys, Socket sockMob){
+		/*try {
 			ssSys = new ServerSocket();
 			ssSys.bind(new InetSocketAddress(addrSys, Main.PORT_MESSAGE_SYS));
-			ssMob = new ServerSocket(Main.PORT_MESSAGE_MOB);
+			ssMob = new ServerSocket();
 			ssMob.bind(new InetSocketAddress(addrMob, Main.PORT_MESSAGE_MOB));
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
+		this.sockSys = sockSys;
+		this.sockMob = sockMob;
 	}
 	
 	public void run(){
 		
 		System.out.println("Message thread started...");
-		while(true){
 			try {
-				sockSys = ssSys.accept();
-				sockMob = ssMob.accept();
+				//sockSys = ssSys.accept();
+				//sockMob = ssMob.accept();
 				
 				InputStream mobIn = sockMob.getInputStream();
 				int msg = mobIn.read();
@@ -62,14 +63,14 @@ public class MessageThread extends Thread {
 				case BYTE_START_LIVEFEED:
 					System.out.println("@@@@@@@@@@@@@@@@@Live Feed on kela..........................");
 					
-					try {
+					/*try {
 						ExchangeFrame exchangeFrame = new ExchangeFrame(sockSys.getInetAddress(), sockMob.getInetAddress());
 						exchangeFrame.start();
 					} catch (IOException e) {
 						e.printStackTrace();
 						break;
 					}
-					
+					*/
 					break;
 				/*case BYTE_START_LISTEN:
 					System.out.println("@@@@@@@@@@@@@@@@@Listen on kela.............................");
@@ -102,6 +103,5 @@ public class MessageThread extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
 	}
 }

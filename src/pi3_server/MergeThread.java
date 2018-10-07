@@ -20,7 +20,7 @@ public class MergeThread extends Thread {
 				return;
 			}
 			
-			MessageThread messageThread = new MessageThread(sysIP, mobIP);
+			//MessageThread messageThread = new MessageThread(sysIP, mobIP);
 		} catch (InterruptedException e) {
 			//TODO: Disconnect client
 			e.printStackTrace();
