@@ -11,9 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ServerSockThread extends Thread {
 
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2MessageSockMap = new ConcurrentHashMap<InetAddress, Socket>();
-	public static ConcurrentHashMap<InetAddress, Socket> mobIP2MessageSockMap = new ConcurrentHashMap<InetAddress, Socket>();
+	//public static ConcurrentHashMap<InetAddress, Socket> mobIP2MessageSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2LivefeedSockMap = new ConcurrentHashMap<InetAddress, Socket>();
-	public static ConcurrentHashMap<InetAddress, Socket> mobIP2LivefeedSockMap = new ConcurrentHashMap<InetAddress, Socket>();
+	//public static ConcurrentHashMap<InetAddress, Socket> mobIP2LivefeedSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 
 	private ServerSocket ss;
 	private int port;
@@ -32,7 +32,7 @@ public class ServerSockThread extends Thread {
 					
 					@Override
 					public void run() {
-						try {
+						
 							switch (port){
 							case Main.PORT_MESSAGE_SYS:
 								sysIP2MessageSockMap.put(sock.getInetAddress(), sock);
@@ -58,6 +58,8 @@ public class ServerSockThread extends Thread {
 							case Main.PORT_LIVEFEED_TCP_MOB:
 								//mobIP2LivefeedSockMap.put(sock.getInetAddress(), sock);
 								
+								
+								try {
 									InputStream sockIn = sock.getInputStream();
 									InetAddress mobIP = sock.getInetAddress();
 									DataInputStream din = new DataInputStream(sockIn);
@@ -81,6 +83,18 @@ public class ServerSockThread extends Thread {
 									}
 									
 									ExchangeFrame.sysIP2MobUdpPortMap.put(sysIP2, udpPort);
+									try{
+										sockIn.read();
+									} catch (IOException e1) {
+										System.out.println("Livefeed stopped!!!");
+										ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
+										Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
+										sysLivefeedSock.close();
+										e1.printStackTrace();
+									}
+								} catch (IOException e1) {
+									e1.printStackTrace();
+								}
 								break;
 							//case Main.PORT_TCP_AUDIO_MOB:
 								
@@ -89,9 +103,6 @@ public class ServerSockThread extends Thread {
 								
 								//break;
 							}
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
 					}
 				}).start();
 				

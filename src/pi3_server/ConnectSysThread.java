@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
 
@@ -41,6 +42,7 @@ public class ConnectSysThread extends Thread{
 					while(true){
 						outSys.write(1);
 						outSys.flush();
+						inSys.read();
 						Thread.sleep(10000);
 					}
 					
@@ -67,10 +69,24 @@ public class ConnectSysThread extends Thread{
 				while(true){
 					outSys.write(1);
 					outSys.flush();
+					inSys.read();
 					Thread.sleep(10000);
 				}
 			}
 		} catch (IOException | InterruptedException e) {
+			InetAddress sysIp = connSysSock.getInetAddress();
+			if (sysIp != null){
+				InetAddress mobIP = Main.sysIP2mobIP.get(sysIp);
+				if (mobIP != null){
+					Main.mobIP2sysIP.remove(mobIP);
+				}
+				Main.sysIP2mobIP.remove(sysIp);
+				ServerSockThread.sysIP2MessageSockMap.remove(sysIp);
+				ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIp);
+			}
+			
+			
+			
 			try {
 				connSysSock.close();
 			} catch (IOException e1) {

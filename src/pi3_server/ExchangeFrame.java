@@ -96,8 +96,8 @@ public class ExchangeFrame extends Thread{
     			e.printStackTrace();
     		}
             
-            long time2 = System.currentTimeMillis();
-            System.out.println("time = " + (time2 - time1));
+            //long time2 = System.currentTimeMillis();
+            //System.out.println("time = " + (time2 - time1));
 		}
 	}
 }
