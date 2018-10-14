@@ -91,7 +91,15 @@ public class ServerSockThread extends Thread {
 										Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
 										sysLivefeedSock.close();
 										e1.printStackTrace();
+										return;
 									}
+									
+									System.out.println("Livefeed stopped!!!");
+									ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
+									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
+									sysLivefeedSock.close();
+									
+									
 								} catch (IOException e1) {
 									e1.printStackTrace();
 								}
