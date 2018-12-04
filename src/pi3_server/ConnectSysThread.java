@@ -74,6 +74,7 @@ public class ConnectSysThread extends Thread{
 				}
 			}
 		} catch (IOException | InterruptedException e) {
+			System.out.println("System disconnected");
 			InetAddress sysIp = connSysSock.getInetAddress();
 			if (sysIp != null){
 				InetAddress mobIP = Main.sysIP2mobIP.get(sysIp);

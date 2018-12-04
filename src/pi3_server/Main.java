@@ -18,6 +18,8 @@ public class Main {
 			PORT_MESSAGE_MOB=7676,
 			PORT_NOTIF_SYS=6667,
 			PORT_NOTIF_MOB=7667,
+			PORT_NOTIF_VIDEO_SYS=6668,
+			PORT_NOTIF_VIDEO_MOB=7668,
 			PORT_NOTIF_FRAME_SYS=6669,
 			PORT_NOTIF_FRAME_MOB=7669,
 			PORT_LIVEFEED_TCP_SYS=6666,
@@ -77,11 +79,15 @@ public class Main {
 			ServerSockThread servSockMsgMobThread = new ServerSockThread(PORT_MESSAGE_MOB);
 			ServerSockThread servSockLivefeedSysThread = new ServerSockThread(PORT_LIVEFEED_TCP_SYS);
 			ServerSockThread servSockLivefeedMobThread = new ServerSockThread(PORT_LIVEFEED_TCP_MOB);
+			ServerSockThread servSockAudioSysThread = new ServerSockThread(PORT_AUDIO_TCP_SYS);
+			ServerSockThread servSockAudioMobThread = new ServerSockThread(PORT_AUDIO_TCP_MOB);
 			
 			servSockMsgSysThread.start();
 			servSockMsgMobThread.start();
 			servSockLivefeedSysThread.start();
 			servSockLivefeedMobThread.start();
+			servSockAudioSysThread.start();
+			servSockAudioMobThread.start();
 		} catch (IOException e2) {
 			e2.printStackTrace();
 			return;
@@ -105,6 +111,6 @@ public class Main {
 				e.printStackTrace();
 			}
 			
-		}	
+		}
 	}
 }

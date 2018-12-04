@@ -121,6 +121,7 @@ class ConnectMobThread extends Thread{
 			}
 			
 		} catch (IOException | InterruptedException e) {
+			System.out.println("Mobile disconnected");
 			InetAddress mobIP = connMobSock.getInetAddress();
 			if (mobIP != null){
 				InetAddress sysIP = Main.mobIP2sysIP.get(mobIP);
