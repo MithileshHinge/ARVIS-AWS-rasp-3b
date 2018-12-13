@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ExchangeAudio extends Thread{
 	
@@ -18,8 +19,10 @@ public class ExchangeAudio extends Thread{
 	//OutputStream out_sys,out_mob;
 	//InputStream in_sys,in_mob;
 	DatagramSocket dataSocket_system, dataSocket_mob;
+	public static ConcurrentHashMap<InetAddress, Integer> mobIP2SysAudioUdpPortMap = new ConcurrentHashMap<>();
 	
-	public ExchangeAudio(InetAddress sysIP, InetAddress mobIP) throws IOException{
+	//public ExchangeAudio(InetAddress sysIP, InetAddress mobIP) throws IOException{
+	public ExchangeAudio() throws IOException{
 		/*ss_mob = new ServerSocket();
 		ss_mob.bind(new InetSocketAddress(sysIP, Main.PORT_AUDIO_TCP_MOB));
 		ss_mob.setSoTimeout(0);
@@ -30,7 +33,7 @@ public class ExchangeAudio extends Thread{
 		*/
 		
         dataSocket_mob = new DatagramSocket(Main.PORT_AUDIO_UDP_MOB);
-        dataSocket_mob.setSoTimeout(500);
+        //dataSocket_mob.setSoTimeout(500);
         
         dataSocket_system = new DatagramSocket(Main.PORT_AUDIO_UDP_SYS);
 	}
@@ -73,31 +76,39 @@ public class ExchangeAudio extends Thread{
             	byte[] receiveData = new byte[4096];   ///1280
 	            // ( 1280 for 16 000Hz and 3584 for 44 100Hz (use AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat) to get the correct size)
 	            
-	            System.out.println(String.format("here"));
+	            //System.out.println(String.format("here"));
 	            DatagramPacket receivePacket = new DatagramPacket(receiveData,receiveData.length);
-	            System.out.println(String.format("...........................................................here"));
+	            //System.out.println(String.format("...........................................................here"));
 	            try{
 					//out_mob.write(1);
             		//out_mob.flush();
-            		
+	            	System.out.println("...Audio receiving from mob... ");
 		            dataSocket_mob.receive(receivePacket);
+		            System.out.println("...Audio received from mob... ");
 		            new Thread(new Runnable(){
 		            	@Override
 		            	public void run() {
+		            		System.out.println("In ExchangeAudio MobIP : " + receivePacket.getAddress());
+		            		int remoteUDPPort =  mobIP2SysAudioUdpPortMap.get(receivePacket.getAddress());
 		            		InetAddress destination = Main.mobIP2sysIP.get(receivePacket.getAddress());
+		            		System.out.println("In ExchangeAudio SysIP : " + destination);
 				            receivePacket.setAddress(destination);
-				            receivePacket.setPort(Main.PORT_AUDIO_UDP_SYS);
+				            //receivePacket.setPort(Main.PORT_AUDIO_UDP_SYS);
+				            
+				            receivePacket.setPort(remoteUDPPort);
+				            
+				            System.out.println("Remote Port : " + remoteUDPPort);
 				            
 				            try {
 								dataSocket_system.send(receivePacket);
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
-				            System.out.println(String.format(".....audio packet sent....................................................."));
+				            System.out.println(".....audio packet sent...................................port = "+ServerSockThread.udpAudioSysLocalPort);
 		            	}
 		            }).start();
 	            }catch (SocketTimeoutException s) {
-	                System.out.println("Socket timed out!");
+	                //System.out.println("Socket timed out!");
 	            }catch (IOException e){
 	            	System.out.println("............Audio sending closed");
 	            	break;
@@ -105,4 +116,6 @@ public class ExchangeAudio extends Thread{
             }
 	    }
 	}
+
+	
 }

@@ -47,8 +47,17 @@ public class ExchangeFrame extends Thread{
 		OutputStream outSys = sockSys.getOutputStream();
 		*/
 		
-		System.out.println("ExchangeThread started....");
+		System.out.println("ExchangeFrame Thread started....");
 		
+		 try {
+			ExchangeAudio exchgAudio = new ExchangeAudio();
+			exchgAudio.start();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		 
+		 
 		/*
 		byte[] handshakeBuf = new byte[256];
 		DatagramPacket handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length);
@@ -60,7 +69,7 @@ public class ExchangeFrame extends Thread{
 		
 		while(true){
             long time1 = System.currentTimeMillis();
-            
+           
             //outMob.write(1);
             //outMob.flush();
             
@@ -77,7 +86,7 @@ public class ExchangeFrame extends Thread{
 					public void run() {
 						//InetAddress mobAddress = ((InetSocketAddress) sockMob.getRemoteSocketAddress()).getAddress();
 						InetAddress mobAddress = Main.sysIP2mobIP.get(receivedPacket.getAddress());
-						System.out.println(""+mobAddress);
+						//System.out.println(""+mobAddress);
 						int remoteUDPPort = sysIP2MobUdpPortMap.get(receivedPacket.getAddress());
 	                    
 	                    receivedPacket.setAddress(mobAddress);
@@ -86,15 +95,17 @@ public class ExchangeFrame extends Thread{
 							dsMob.send(receivedPacket);
 						} catch (IOException e) {
 							e.printStackTrace();
+					
 						}
 	                    
-	                    System.out.println("...Frame forwarded to android..." + "port = " + remoteUDPPort);
+	                    //System.out.println("...Frame forwarded to android..." + "port = " + remoteUDPPort);
 					}
 				}).start();
                 
 
             } catch (IOException e) {
     			e.printStackTrace();
+    			System.out.println("Exchange Frame Sys catch");
     		}
             
             //long time2 = System.currentTimeMillis();

@@ -63,12 +63,16 @@ public class Main {
 		
 		new Thread(new Runnable(){
 			public void run(){
-				try {
-					Socket connMobSock = connMobSS.accept();
-					ConnectMobThread connMobThread = new ConnectMobThread(connMobSock);
-					connMobThread.start();
-				} catch (IOException e) {
-					e.printStackTrace();
+				while(true){
+					try {
+						Socket connMobSock = connMobSS.accept();
+						ConnectMobThread connMobThread = new ConnectMobThread(connMobSock);
+						connMobThread.start();
+						System.out.println("conn mob new thread started");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
 				}
 				
 			}
@@ -81,6 +85,8 @@ public class Main {
 			ServerSockThread servSockLivefeedMobThread = new ServerSockThread(PORT_LIVEFEED_TCP_MOB);
 			ServerSockThread servSockAudioSysThread = new ServerSockThread(PORT_AUDIO_TCP_SYS);
 			ServerSockThread servSockAudioMobThread = new ServerSockThread(PORT_AUDIO_TCP_MOB);
+			ServerSockThread servSockVideoSysThread = new ServerSockThread(PORT_NOTIF_VIDEO_SYS);
+			ServerSockThread servSockVideoMobThread = new ServerSockThread(PORT_NOTIF_VIDEO_MOB);
 			
 			servSockMsgSysThread.start();
 			servSockMsgMobThread.start();
@@ -88,6 +94,9 @@ public class Main {
 			servSockLivefeedMobThread.start();
 			servSockAudioSysThread.start();
 			servSockAudioMobThread.start();
+			servSockVideoSysThread.start();
+			servSockVideoMobThread.start();
+			
 		} catch (IOException e2) {
 			e2.printStackTrace();
 			return;
@@ -107,6 +116,7 @@ public class Main {
 				Socket connSysSock = connSysSS.accept();
 				ConnectSysThread connSysThread = new ConnectSysThread(connSysSock);
 				connSysThread.start();
+				System.out.println("conn sys new thread started");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
