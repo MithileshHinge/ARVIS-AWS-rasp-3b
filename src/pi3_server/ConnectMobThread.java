@@ -31,7 +31,7 @@ class ConnectMobThread extends Thread{
 			if (Main.db.checkRegistered(hashID)){
 				outMob.write(1);  //Registered
 				outMob.flush();
-				for (int i=0; i<5; i++){ // No of login attempts
+				for (int i=0; i<5; i++){    // No of login attempts
 					String username = dInMob.readUTF();
 					String password = dInMob.readUTF();
 					//TODO - receive fcm token from mob !
@@ -68,6 +68,7 @@ class ConnectMobThread extends Thread{
 				String username = dInMob.readUTF();
 				String password = dInMob.readUTF();
 				ConnectSysThread.fcm_token = dInMob.readUTF();
+				ConnectSysThread.emailId = dInMob.readUTF();
 						
 				if (Main.db.registerUser(username, password, hashID)){
 					outMob.write(6); // Registration successful
@@ -115,6 +116,7 @@ class ConnectMobThread extends Thread{
 			Main.mobIP2sysIP.put(mobIP, sysIP);
 			System.out.println("ConnectMobThread MobIP : " + mobIP + " SysIP : " + sysIP);
 			Main.sysIP2mobIP.put(sysIP, mobIP);
+			Main.hashID2emailID.put(hashID, ConnectSysThread.emailId);
 			
 			//MessageThread messageThread = new MessageThread(sysMessageSock, mobMessageSock);
 			//messageThread.start();
