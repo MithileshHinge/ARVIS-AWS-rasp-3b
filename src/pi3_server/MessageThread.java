@@ -21,7 +21,8 @@ public class MessageThread extends Thread {
 			BYTE_STOP_ALARM=8, 
 			BYTE_START_LIVEFEED=2,
 			//BYTE_STOP_LIVEFEED=4,
-			BYTE_START_VIDEO_DOWNLOAD = 14;
+			BYTE_START_VIDEO_DOWNLOAD = 14,
+			BYTE_START_LISTEN = 5;
 			
 	
 	MessageThread(Socket sockSys, Socket sockMob){
@@ -91,7 +92,8 @@ public class MessageThread extends Thread {
 				case BYTE_START_VIDEO_DOWNLOAD:
 					System.out.println("#######################   Video download request ");
 					break;
-				
+				case BYTE_START_LISTEN:
+					break;
 				}
 				
 				sockSys.getOutputStream().write(msg);

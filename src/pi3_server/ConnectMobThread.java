@@ -69,7 +69,7 @@ class ConnectMobThread extends Thread{
 				String password = dInMob.readUTF();
 				ConnectSysThread.fcm_token = dInMob.readUTF();
 				ConnectSysThread.emailId = dInMob.readUTF();
-						
+				Main.hashID2emailID.put(hashID, ConnectSysThread.emailId);		
 				if (Main.db.registerUser(username, password, hashID)){
 					outMob.write(6); // Registration successful
 					outMob.flush();
@@ -116,7 +116,7 @@ class ConnectMobThread extends Thread{
 			Main.mobIP2sysIP.put(mobIP, sysIP);
 			System.out.println("ConnectMobThread MobIP : " + mobIP + " SysIP : " + sysIP);
 			Main.sysIP2mobIP.put(sysIP, mobIP);
-			Main.hashID2emailID.put(hashID, ConnectSysThread.emailId);
+			
 			
 			//MessageThread messageThread = new MessageThread(sysMessageSock, mobMessageSock);
 			//messageThread.start();
@@ -140,7 +140,8 @@ class ConnectMobThread extends Thread{
 				System.out.print("sysIP : " + sysIP);
 				if (sysIP != null){
 					Main.sysIP2mobIP.remove(sysIP);
-					ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP);
+					ExchangeFrame.sysIP2MobUdpPortLFMap.remove(sysIP);
+					ExchangeListen.sysIP2MobUdpPortListenMap.remove(sysIP);
 					ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(mobIP);
 					//TODO - do for exchange audio
 				}	

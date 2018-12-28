@@ -16,7 +16,7 @@ public class ExchangeFrame extends Thread{
 	
 	//private ServerSocket ssSys, ssMob;
 	private DatagramSocket dsSys, dsMob;
-	public static ConcurrentHashMap<InetAddress, Integer> sysIP2MobUdpPortMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetAddress, Integer> sysIP2MobUdpPortLFMap = new ConcurrentHashMap<>();
 	//private Socket sockSys, sockMob;
 	
 	public ExchangeFrame() throws IOException{
@@ -57,7 +57,12 @@ public class ExchangeFrame extends Thread{
 			e1.printStackTrace();
 		}
 		 
-		 
+		try{
+			ExchangeListen exchgListen = new ExchangeListen();
+			exchgListen.start();
+		} catch (IOException e2){
+			e2.printStackTrace();
+		}
 		/*
 		byte[] handshakeBuf = new byte[256];
 		DatagramPacket handshakePacket = new DatagramPacket(handshakeBuf, handshakeBuf.length);
@@ -77,9 +82,9 @@ public class ExchangeFrame extends Thread{
             	byte[] buf = new byte[64000];
                 DatagramPacket receivedPacket = new DatagramPacket(buf, buf.length);
                 //udpSocket_sys.setSoTimeout(2000);
-                System.out.println("...Frame receiving from system... ");
+                //System.out.println("...Frame receiving from system... ");
                 dsSys.receive(receivedPacket);
-                System.out.println("...Frame received from system... ");
+                //System.out.println("...Frame received from system... ");
                 new Thread(new Runnable() {
 					
 					@Override
@@ -87,7 +92,7 @@ public class ExchangeFrame extends Thread{
 						//InetAddress mobAddress = ((InetSocketAddress) sockMob.getRemoteSocketAddress()).getAddress();
 						InetAddress mobAddress = Main.sysIP2mobIP.get(receivedPacket.getAddress());
 						//System.out.println(""+mobAddress);
-						int remoteUDPPort = sysIP2MobUdpPortMap.get(receivedPacket.getAddress());
+						int remoteUDPPort = sysIP2MobUdpPortLFMap.get(receivedPacket.getAddress());
 	                    
 	                    receivedPacket.setAddress(mobAddress);
 	                    receivedPacket.setPort(remoteUDPPort);

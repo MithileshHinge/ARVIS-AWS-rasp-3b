@@ -29,7 +29,12 @@ public class Main {
 			PORT_AUDIO_TCP_SYS=6670,
 			PORT_AUDIO_TCP_MOB=7670,
 			PORT_AUDIO_UDP_SYS=6671,
-			PORT_AUDIO_UDP_MOB=7671;
+			PORT_AUDIO_UDP_MOB=7671,
+			PORT_LISTEN_TCP_SYS=6675,
+			PORT_LISTEN_TCP_MOB=7675,
+			PORT_LISTEN_UDP_SYS=6673,
+			PORT_LISTEN_UDP_MOB=7673;
+			
 
 	public static final byte 
 			BYTE_FACEFOUND_VDOGENERATING = 1, 
@@ -89,6 +94,8 @@ public class Main {
 			ServerSockThread servSockAudioMobThread = new ServerSockThread(PORT_AUDIO_TCP_MOB);
 			ServerSockThread servSockVideoSysThread = new ServerSockThread(PORT_NOTIF_VIDEO_SYS);
 			ServerSockThread servSockVideoMobThread = new ServerSockThread(PORT_NOTIF_VIDEO_MOB);
+			ServerSockThread servSockListenSysThread = new ServerSockThread(PORT_LISTEN_TCP_SYS);
+			ServerSockThread servSockListenMobThread = new ServerSockThread(PORT_LISTEN_TCP_MOB);
 			
 			servSockMsgSysThread.start();
 			servSockMsgMobThread.start();
@@ -98,6 +105,8 @@ public class Main {
 			servSockAudioMobThread.start();
 			servSockVideoSysThread.start();
 			servSockVideoMobThread.start();
+			servSockListenSysThread.start();
+			servSockListenMobThread.start();
 			
 		} catch (IOException e2) {
 			e2.printStackTrace();

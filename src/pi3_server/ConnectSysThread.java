@@ -90,7 +90,9 @@ public class ConnectSysThread extends Thread{
 				}
 				Main.sysIP2mobIP.remove(sysIp);
 				ServerSockThread.sysIP2MessageSockMap.remove(sysIp);
-				ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIp);
+				ExchangeFrame.sysIP2MobUdpPortLFMap.remove(sysIp);
+				ExchangeListen.sysIP2MobUdpPortListenMap.remove(sysIp);
+				ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(sysIp);
 			}
 			
 			
