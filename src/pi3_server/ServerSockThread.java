@@ -1,5 +1,7 @@
 package pi3_server;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,7 +10,10 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.imageio.ImageIO;
 
 public class ServerSockThread extends Thread {
 
@@ -175,6 +180,72 @@ public class ServerSockThread extends Thread {
 									mobOut.flush();
 									sysVideoSock.close();
 									sock.close();
+									
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+								break;
+
+							case Main.PORT_PERSON_DETECT_GPU:
+								Main.sockGPU = sock;
+								break;
+							case Main.PORT_PERSON_DETECT_SYS:
+								try {
+									InputStream in = sock.getInputStream();
+									OutputStream out = sock.getOutputStream();
+									DataInputStream din = new DataInputStream(in);
+									DataOutputStream dout = new DataOutputStream(out);
+									String hashID = din.readUTF();
+									ConnectSysThread connSysThread = Main.connSysThreadsMap.get(hashID);
+									if (sock.getInetAddress().equals(connSysThread.connSysSock.getInetAddress())){
+										out.write(1); //system verified
+										out.flush();
+										int width = din.readInt();
+										int height = din.readInt();
+										int dataSize = width * height * 3;
+										byte[] bWidth = ByteBuffer.allocate(4).putInt(width).array();
+										byte[] bHeight = ByteBuffer.allocate(4).putInt(height).array();
+										byte[] bSize = ByteBuffer.allocate(4).putInt(dataSize).array();
+										while(Main.sockGPU == null){
+											try {
+												Thread.sleep(500);
+											} catch (InterruptedException e) {
+												e.printStackTrace();
+											}
+										}
+										OutputStream outGPU = Main.sockGPU.getOutputStream();
+										outGPU.write(bWidth);
+										outGPU.write(bHeight);
+										outGPU.write(bSize);
+										outGPU.flush();
+
+										for (int i=0; i<dataSize; i++){
+											int oneByte = in.read();
+											outGPU.write(oneByte);
+										}
+										outGPU.flush();
+										Main.sockGPU.close();
+
+										Socket sockGPU2 = Main.ssGPU2.accept();
+										byte[] bCount = new byte[4];
+										InputStream inGPU2 = sockGPU2.getInputStream();
+
+										for (int i=0; i<4; i++){
+											bCount[i] = (byte) inGPU2.read();
+										}
+
+										int count = ByteBuffer.wrap(bCount).getInt();
+
+										sockGPU2.close();
+										
+										System.out.println("Person count: " + count);
+
+										dout.writeInt(count);
+										dout.flush();
+									}else{
+										sock.close();
+										return;
+									}
 									
 								} catch (IOException e) {
 									e.printStackTrace();

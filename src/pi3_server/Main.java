@@ -29,7 +29,10 @@ public class Main {
 			PORT_AUDIO_TCP_SYS=6670,
 			PORT_AUDIO_TCP_MOB=7670,
 			PORT_AUDIO_UDP_SYS=6671,
-			PORT_AUDIO_UDP_MOB=7671;
+			PORT_AUDIO_UDP_MOB=7671,
+			PORT_PERSON_DETECT_SYS=6672,
+			PORT_PERSON_DETECT_GPU=5672,
+			PORT_PERSON_DETECT_GPU2=5673;
 
 	public static final byte 
 			BYTE_FACEFOUND_VDOGENERATING = 1, 
@@ -50,12 +53,16 @@ public class Main {
 	public static UserDatabaseHandler db = new UserDatabaseHandler();
 	private static ServerSocket connSysSS = null;
 	private static ServerSocket connMobSS = null;
+	public static volatile Socket sockGPU = null;
+	public static ServerSocket ssGPU2;
 	
 	public static void main(String[] args) {
 		
 		try {
 			connSysSS = new ServerSocket(PORT_CONN_SYS);
 			connMobSS = new ServerSocket(PORT_CONN_MOB);
+			
+			ssGPU2 = new ServerSocket(PORT_PERSON_DETECT_GPU2);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -81,17 +88,24 @@ public class Main {
 			ServerSockThread servSockLivefeedMobThread = new ServerSockThread(PORT_LIVEFEED_TCP_MOB);
 			ServerSockThread servSockAudioSysThread = new ServerSockThread(PORT_AUDIO_TCP_SYS);
 			ServerSockThread servSockAudioMobThread = new ServerSockThread(PORT_AUDIO_TCP_MOB);
-			
+			ServerSockThread servSockDetectPersonSysThread = new ServerSockThread(PORT_PERSON_DETECT_SYS);
+			ServerSockThread servSockDetectPersonGPUThread = new ServerSockThread(PORT_PERSON_DETECT_GPU);
+
 			servSockMsgSysThread.start();
 			servSockMsgMobThread.start();
 			servSockLivefeedSysThread.start();
 			servSockLivefeedMobThread.start();
 			servSockAudioSysThread.start();
 			servSockAudioMobThread.start();
+			servSockDetectPersonSysThread.start();
+			servSockDetectPersonGPUThread.start();
 		} catch (IOException e2) {
 			e2.printStackTrace();
 			return;
 		}
+		
+		
+		
 		
 		try {
 			exchangeFrame = new ExchangeFrame();
