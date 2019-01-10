@@ -20,7 +20,9 @@ public class MessageThread extends Thread {
 			BYTE_PLAY_ALARM=7, 
 			BYTE_STOP_ALARM=8, 
 			BYTE_START_LIVEFEED=2,
-			BYTE_STOP_LIVEFEED=4;
+			//BYTE_STOP_LIVEFEED=4,
+			BYTE_START_VIDEO_DOWNLOAD = 14;
+			
 	
 	MessageThread(Socket sockSys, Socket sockMob){
 		/*try {
@@ -86,16 +88,22 @@ public class MessageThread extends Thread {
 				case BYTE_STOP_ALARM:
 					System.out.println("#########################   Alarm off kela ");
 					break;
+				case BYTE_START_VIDEO_DOWNLOAD:
+					System.out.println("#######################   Video download request ");
+					break;
 				
 				}
 				
 				sockSys.getOutputStream().write(msg);
 				sockSys.getOutputStream().flush();
+				System.out.println("............................msg thread - byte sent to sys.................");
 				
 				sockSys.getInputStream().read(); //TODO: Error handling can be implemented here (different bytes received for different errors/response, e.g. 1=SUCCESS)
+				System.out.println("............................msg thread - ack received from sys.................");
 				
 				sockMob.getOutputStream().write(1);
 				sockMob.getOutputStream().flush();
+				System.out.println("............................msg thread - ack sent to mob.................");
 				
 				sockSys.close();
 				sockMob.close();

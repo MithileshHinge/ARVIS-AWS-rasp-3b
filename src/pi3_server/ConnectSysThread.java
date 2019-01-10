@@ -13,6 +13,7 @@ public class ConnectSysThread extends Thread{
 	public Socket connSysSock;
 	public String hashID;
 	volatile public String username, password;
+	public static String fcm_token , emailId;
 	volatile public CountDownLatch latch = new CountDownLatch(1);
 	
 	ConnectSysThread(Socket connSysSock){
@@ -26,10 +27,12 @@ public class ConnectSysThread extends Thread{
 			DataOutputStream doutSys = new DataOutputStream(outSys);
 			
 			hashID = dinSys.readUTF();
-			
+			System.out.println("hash id from sys = "+ hashID);
 			if (Main.db.checkRegistered(hashID)){
 				String username = dinSys.readUTF();
 				String password = dinSys.readUTF();
+				outSys.write(0);
+				outSys.flush();
 				if (Main.db.verifyUser(username, password, hashID)){
 //					MergeThread mergeThread = new MergeThread();
 //					mergeThread.sysIP = connSysSock.getInetAddress();
@@ -63,9 +66,13 @@ public class ConnectSysThread extends Thread{
 				
 				doutSys.writeUTF(username);
 				doutSys.writeUTF(password);
+				doutSys.writeUTF(fcm_token);
+				doutSys.writeUTF(emailId);
+				System.out.println("FCM Token : " + fcm_token);
+				System.out.println("..................emailId............. = " + emailId);
+				//TODO - send fcm token to system
 				
 				// Check if connection is alive every 10 seconds
-				
 				while(true){
 					outSys.write(1);
 					outSys.flush();
@@ -96,6 +103,14 @@ public class ConnectSysThread extends Thread{
 			if (hashID != null)
 				Main.connSysThreadsMap.remove(hashID);
 			e.printStackTrace();
+			
+			// Notify mob that system is disconnected
+			SendMail sendmail = new SendMail();
+			sendmail.start();
+			SendMail.sendMailTo = Main.hashID2emailID.get(hashID);
+			SendMail.sendmail = true;
+			
+			
 		}
 	}
 }

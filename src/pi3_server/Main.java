@@ -48,6 +48,8 @@ public class Main {
 	public static ConcurrentHashMap<InetAddress, InetAddress> mobIP2sysIP = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress, InetAddress> sysIP2mobIP = new ConcurrentHashMap<InetAddress, InetAddress>();
 	public static ConcurrentHashMap<String, ConnectSysThread> connSysThreadsMap = new ConcurrentHashMap<>();
+	
+	public static ConcurrentHashMap<String, String> hashID2emailID = new ConcurrentHashMap<>();
 	//public static ConcurrentHashMap<String, InetAddress> hashID2sysIPMap= new ConcurrentHashMap<>();
 	//public static ConcurrentHashMap<String, InetAddress> hashID2mobIPMap= new ConcurrentHashMap<>();
 	public static UserDatabaseHandler db = new UserDatabaseHandler();
@@ -70,12 +72,16 @@ public class Main {
 		
 		new Thread(new Runnable(){
 			public void run(){
-				try {
-					Socket connMobSock = connMobSS.accept();
-					ConnectMobThread connMobThread = new ConnectMobThread(connMobSock);
-					connMobThread.start();
-				} catch (IOException e) {
-					e.printStackTrace();
+				while(true){
+					try {
+						Socket connMobSock = connMobSS.accept();
+						ConnectMobThread connMobThread = new ConnectMobThread(connMobSock);
+						connMobThread.start();
+						System.out.println("conn mob new thread started");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
 				}
 				
 			}
@@ -90,6 +96,9 @@ public class Main {
 			ServerSockThread servSockAudioMobThread = new ServerSockThread(PORT_AUDIO_TCP_MOB);
 			ServerSockThread servSockDetectPersonSysThread = new ServerSockThread(PORT_PERSON_DETECT_SYS);
 			ServerSockThread servSockDetectPersonGPUThread = new ServerSockThread(PORT_PERSON_DETECT_GPU);
+			ServerSockThread servSockVideoSysThread = new ServerSockThread(PORT_NOTIF_VIDEO_SYS);
+			ServerSockThread servSockVideoMobThread = new ServerSockThread(PORT_NOTIF_VIDEO_MOB);
+			
 
 			servSockMsgSysThread.start();
 			servSockMsgMobThread.start();
@@ -99,6 +108,9 @@ public class Main {
 			servSockAudioMobThread.start();
 			servSockDetectPersonSysThread.start();
 			servSockDetectPersonGPUThread.start();
+			servSockVideoSysThread.start();
+			servSockVideoMobThread.start();
+			
 		} catch (IOException e2) {
 			e2.printStackTrace();
 			return;
@@ -121,6 +133,7 @@ public class Main {
 				Socket connSysSock = connSysSS.accept();
 				ConnectSysThread connSysThread = new ConnectSysThread(connSysSock);
 				connSysThread.start();
+				System.out.println("conn sys new thread started");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
