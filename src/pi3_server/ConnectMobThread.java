@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 
 class ConnectMobThread extends Thread{
@@ -27,7 +29,8 @@ class ConnectMobThread extends Thread{
 			OutputStream outMob = connMobSock.getOutputStream();
 			
 			String hashID = dInMob.readUTF();
-			System.out.println("hash id from mob = "+hashID);
+			Date date = new Date();
+			System.out.println(Main.ft.format(date)+"	hash id from mob = "+hashID);
 			if (Main.db.checkRegistered(hashID)){
 				outMob.write(1);  //Registered
 				outMob.flush();
@@ -69,7 +72,7 @@ class ConnectMobThread extends Thread{
 				String password = dInMob.readUTF();
 				ConnectSysThread.fcm_token = dInMob.readUTF();
 				ConnectSysThread.emailId = dInMob.readUTF();
-						
+				Main.hashID2emailID.put(hashID, ConnectSysThread.emailId);
 				if (Main.db.registerUser(username, password, hashID)){
 					outMob.write(6); // Registration successful
 					outMob.flush();
@@ -116,22 +119,28 @@ class ConnectMobThread extends Thread{
 			Main.mobIP2sysIP.put(mobIP, sysIP);
 			System.out.println("ConnectMobThread MobIP : " + mobIP + " SysIP : " + sysIP);
 			Main.sysIP2mobIP.put(sysIP, mobIP);
-			Main.hashID2emailID.put(hashID, ConnectSysThread.emailId);
 			
 			//MessageThread messageThread = new MessageThread(sysMessageSock, mobMessageSock);
 			//messageThread.start();
 			
 			outMob.write(9);  // Connection successful
 			
+			connMobSock.setSoTimeout(2000);
 			while(true){
 				outMob.write(1);
 				outMob.flush();
-				inMob.read();
+				try{
+					inMob.read();
+				}catch(SocketTimeoutException e){
+					e.printStackTrace();
+					continue;
+				}
 				Thread.sleep(10000);
 			}
 			
 		} catch (IOException | InterruptedException e) {
-			System.out.println("Mobile disconnected ");
+			Date date = new Date();
+			System.out.println(Main.ft.format(date)+"Mobile disconnected ");
 			InetAddress mobIP = connMobSock.getInetAddress();
 			System.out.println("IN ConnectMobThread mobIP : " + mobIP);
 			if (mobIP != null){

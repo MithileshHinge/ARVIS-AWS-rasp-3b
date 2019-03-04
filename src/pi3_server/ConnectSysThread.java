@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 
 public class ConnectSysThread extends Thread{
@@ -27,7 +30,8 @@ public class ConnectSysThread extends Thread{
 			DataOutputStream doutSys = new DataOutputStream(outSys);
 			
 			hashID = dinSys.readUTF();
-			System.out.println("hash id from sys = "+ hashID);
+			Date date = new Date();
+			System.out.println(Main.ft.format(date)+"	hash id from sys = "+ hashID);
 			if (Main.db.checkRegistered(hashID)){
 				String username = dinSys.readUTF();
 				String password = dinSys.readUTF();
@@ -42,10 +46,17 @@ public class ConnectSysThread extends Thread{
 					Main.connSysThreadsMap.put(hashID, this);
 					
 					// Check if connection is alive every 10 seconds
+
+					connSysSock.setSoTimeout(1000);
 					while(true){
 						outSys.write(1);
 						outSys.flush();
-						inSys.read();
+						try{
+							inSys.read();
+						}catch(SocketTimeoutException e){
+							e.printStackTrace();
+							continue;
+						}
 						Thread.sleep(10000);
 					}
 					
@@ -73,15 +84,22 @@ public class ConnectSysThread extends Thread{
 				//TODO - send fcm token to system
 				
 				// Check if connection is alive every 10 seconds
+				connSysSock.setSoTimeout(1000);
 				while(true){
 					outSys.write(1);
 					outSys.flush();
-					inSys.read();
+					try{
+						inSys.read();
+					}catch(SocketTimeoutException e){
+						e.printStackTrace();
+						continue;
+					}
 					Thread.sleep(10000);
 				}
 			}
 		} catch (IOException | InterruptedException e) {
-			System.out.println("System disconnected");
+			Date date = new Date();
+			System.out.println(Main.ft.format(date) + "System disconnected");
 			InetAddress sysIp = connSysSock.getInetAddress();
 			if (sysIp != null){
 				InetAddress mobIP = Main.sysIP2mobIP.get(sysIp);
@@ -106,10 +124,10 @@ public class ConnectSysThread extends Thread{
 			
 			// Notify mob that system is disconnected
 			SendMail sendmail = new SendMail();
+			sendmail.sendMailTo = Main.hashID2emailID.get(hashID);
+			System.out.println("sendMailTo = "+sendmail.sendMailTo);
+			sendmail.sendmail = true;
 			sendmail.start();
-			SendMail.sendMailTo = Main.hashID2emailID.get(hashID);
-			SendMail.sendmail = true;
-			
 			
 		}
 	}

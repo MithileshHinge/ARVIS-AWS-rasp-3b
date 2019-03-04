@@ -18,6 +18,7 @@ public class UserDatabaseHandler {
 							+" hashid text, \n"
 							+" username text, \n"
 							+" password text \n"
+							+" email text \n"
 							+" );";
 							
 		try (Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()){
@@ -31,12 +32,13 @@ public class UserDatabaseHandler {
 	}
 	
 	public boolean addSystem(String hashID){
-		String insert = "INSERT INTO " + TABLE_NAME + "(hashid, username, password) VALUES(?,?,?)";
+		String insert = "INSERT INTO " + TABLE_NAME + "(hashid, username, password, email) VALUES(?,?,?,?)";
 		 
         try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(insert)) {
             pstmt.setString(1, hashID);
             pstmt.setString(2, null);
             pstmt.setString(3, null);
+            pstmt.setString(4, null);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -64,13 +66,14 @@ public class UserDatabaseHandler {
 		return false;
 	}
 	
-	public boolean registerUser(String username, String password, String hashID){
-		String register = "UPDATE " + TABLE_NAME + " SET username = ? , password = ? WHERE hashid = ?";
+	public boolean registerUser(String username, String password, String hashID, String email){
+		String register = "UPDATE " + TABLE_NAME + " SET username = ? , password = ? , email = ? WHERE hashid = ?";
 		try(Connection conn = DriverManager.getConnection(url)){
 			PreparedStatement pst = conn.prepareStatement(register);
 			pst.setString(1, username);
 			pst.setString(2, password);
-			pst.setString(3, hashID);
+			pst.setString(3, email);
+			pst.setString(4, hashID);
 			
 			pst.executeUpdate();
 		} catch (SQLException e){
@@ -111,6 +114,23 @@ public class UserDatabaseHandler {
 			ResultSet rs = pst.executeQuery();
 			if (rs.next()){
 				return rs.getString("hashid");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	public String getEmail(String hashid){
+		try (Connection conn = DriverManager.getConnection(url)){
+			String checkRegistered = "SELECT * FROM " + TABLE_NAME + " WHERE hashid = ?;";
+			PreparedStatement pst = conn.prepareStatement(checkRegistered);
+			pst.setString(1, hashid);
+			
+			ResultSet rs = pst.executeQuery();
+			if (rs.next()){
+				return rs.getString("email");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -14,8 +14,8 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 public class SendMail extends Thread {	
-	public static boolean sendmail = false;			//controlled from settings on android
-	public static String sendMailTo;
+	public boolean sendmail = false;			//controlled from settings on android
+	public String sendMailTo;
 	public void run(){
 		try {
 			Thread.sleep(0, 10000);
@@ -27,7 +27,7 @@ public class SendMail extends Thread {
 		if(sendmail)
 		{
 			  sendmail = false;
-			  System.out.println("######################Sending start zala#################");
+			  System.out.println("######################Sending start zala#################	" + sendMailTo);
 			  // Recipient's email ID needs to be mentioned.
 		      //String to = "shubhamkanhere30@gmail.com";
 		      // Sender's email ID needs to be mentioned
@@ -72,7 +72,7 @@ public class SendMail extends Thread {
 		         BodyPart messageBodyPart = new MimeBodyPart();
 	
 		         // Now set the actual message
-		         messageBodyPart.setText("Hello!" + '\n' + "This mail is sent to alert you for the inactivity of your Magic Eye system" + '\n' + "Please take a look."+'\n'+'\n'+'\n'+"THIS IS A SYSTEM GENERATED MAIL. PLEASE DO NOT REPLY"+'\n'+"FOR ANY TYPE OF QUERY CONTACT : +91 8793587391");
+		         messageBodyPart.setText("Hello!" + '\n' + "This mail is sent to alert you for the inactivity of your Magic Eye system" + '\n' + "Please take a look."+'\n'+'\n'+'\n'+"THIS IS A SYSTEM GENERATED MAIL. PLEASE DO NOT REPLY");
 	
 		         // Create a multipart message
 		         Multipart multipart = new MimeMultipart();

@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.imageio.ImageIO;
@@ -37,7 +38,8 @@ public class ServerSockThread extends Thread {
 		while(true){
 			try {
 				Socket sock = ss.accept();
-				System.out.println("Socket accepted port: " + port);
+				Date date = new Date();
+				System.out.println(Main.ft.format(date) + "	Socket accepted port: " + port);
 				new Thread(new Runnable() {
 					
 					@Override
@@ -76,8 +78,8 @@ public class ServerSockThread extends Thread {
 									InetAddress mobIP = sock.getInetAddress();
 									DataInputStream din = new DataInputStream(sockIn);
 									int udpPort = din.readInt();
-									System.out.println("UDP port: " + udpPort);
-									
+									String hashID = din.readUTF();
+									System.out.println("UDP port: " + udpPort + "hashID = "+ hashID);
 									InetAddress sysIP2 = Main.mobIP2sysIP.get(mobIP);
 									if (sysIP2 == null){
 										System.out.println("Mobile with this IP has never initiated ConnectMob method OR Corresponding System is offline");
@@ -91,6 +93,7 @@ public class ServerSockThread extends Thread {
 										}
 										return;
 									}else {
+										sysIP2 = Main.connSysThreadsMap.get(hashID).connSysSock.getInetAddress();
 										sock.getOutputStream().write(1);
 										sock.getOutputStream().flush();
 									}

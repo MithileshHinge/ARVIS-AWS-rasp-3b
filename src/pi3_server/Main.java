@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
@@ -57,6 +58,7 @@ public class Main {
 	private static ServerSocket connMobSS = null;
 	public static volatile Socket sockGPU = null;
 	public static ServerSocket ssGPU2;
+	public static SimpleDateFormat ft = new SimpleDateFormat("yyyy_MM_dd'at'hh_mm_ss_a");
 	
 	public static void main(String[] args) {
 		

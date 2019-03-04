@@ -86,7 +86,7 @@ public class ExchangeFrame extends Thread{
 					public void run() {
 						//InetAddress mobAddress = ((InetSocketAddress) sockMob.getRemoteSocketAddress()).getAddress();
 						InetAddress mobAddress = Main.sysIP2mobIP.get(receivedPacket.getAddress());
-						//System.out.println(""+mobAddress);
+						System.out.println("Mob address......."+mobAddress);
 						int remoteUDPPort = sysIP2MobUdpPortMap.get(receivedPacket.getAddress());
 	                    
 	                    receivedPacket.setAddress(mobAddress);
