@@ -73,7 +73,7 @@ class ConnectMobThread extends Thread{
 				ConnectSysThread.fcm_token = dInMob.readUTF();
 				ConnectSysThread.emailId = dInMob.readUTF();
 				Main.hashID2emailID.put(hashID, ConnectSysThread.emailId);
-				if (Main.db.registerUser(username, password, hashID)){
+				if (Main.db.registerUser(username, password, hashID, ConnectSysThread.emailId)){
 					outMob.write(6); // Registration successful
 					outMob.flush();
 				}else {
