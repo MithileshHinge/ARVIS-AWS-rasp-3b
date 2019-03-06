@@ -8,15 +8,13 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 
 public class ConnectSysThread extends Thread{
 	public Socket connSysSock;
 	public String hashID;
-	volatile public String username, password;
-	public static String fcm_token , emailId;
+	volatile public String username, password, fcm_token , emailId;
 	volatile public CountDownLatch latch = new CountDownLatch(1);
 	
 	ConnectSysThread(Socket connSysSock){
@@ -124,10 +122,11 @@ public class ConnectSysThread extends Thread{
 			
 			// Notify mob that system is disconnected
 			SendMail sendmail = new SendMail();
-			sendmail.sendMailTo = Main.hashID2emailID.get(hashID);
-			System.out.println("sendMailTo = "+sendmail.sendMailTo);
+			sendmail.sendMailTo = Main.db.getEmail(hashID);
 			sendmail.sendmail = true;
 			sendmail.start();
+			
+			System.out.println("sendMailTo = "+sendmail.sendMailTo);
 			
 		}
 	}

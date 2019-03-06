@@ -70,10 +70,9 @@ class ConnectMobThread extends Thread{
 				
 				String username = dInMob.readUTF();
 				String password = dInMob.readUTF();
-				ConnectSysThread.fcm_token = dInMob.readUTF();
-				ConnectSysThread.emailId = dInMob.readUTF();
-				Main.hashID2emailID.put(hashID, ConnectSysThread.emailId);
-				if (Main.db.registerUser(username, password, hashID, ConnectSysThread.emailId)){
+				String fcm_token = dInMob.readUTF();
+				String emailId = dInMob.readUTF();
+				if (Main.db.registerUser(username, password, hashID, emailId)){
 					outMob.write(6); // Registration successful
 					outMob.flush();
 				}else {
@@ -94,8 +93,10 @@ class ConnectMobThread extends Thread{
 				
 				connSysThread.username = username;
 				connSysThread.password = password;
-				connSysThread.latch.countDown();
+				connSysThread.fcm_token = fcm_token;
+				connSysThread.emailId = emailId;
 				
+				connSysThread.latch.countDown();
 			}
 			
 			/*MergeThread mergeThread = mergeThreadsMap.get(hashID);
@@ -132,7 +133,7 @@ class ConnectMobThread extends Thread{
 				try{
 					inMob.read();
 				}catch(SocketTimeoutException e){
-					e.printStackTrace();
+					//e.printStackTrace();
 					continue;
 				}
 				Thread.sleep(10000);

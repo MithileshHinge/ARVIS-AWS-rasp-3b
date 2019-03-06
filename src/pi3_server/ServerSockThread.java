@@ -110,7 +110,7 @@ public class ServerSockThread extends Thread {
 										return;
 									}
 									
-									System.out.println("Livefeed stopped!!!");
+									System.out.println("Livefeed stopped weirdly!!!@@@@@@@@@@@@@@@@@@");
 									ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
 									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
 									sysLivefeedSock.close();

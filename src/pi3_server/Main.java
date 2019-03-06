@@ -50,7 +50,7 @@ public class Main {
 	public static ConcurrentHashMap<InetAddress, InetAddress> sysIP2mobIP = new ConcurrentHashMap<InetAddress, InetAddress>();
 	public static ConcurrentHashMap<String, ConnectSysThread> connSysThreadsMap = new ConcurrentHashMap<>();
 	
-	public static ConcurrentHashMap<String, String> hashID2emailID = new ConcurrentHashMap<>();
+	//public static ConcurrentHashMap<String, String> hashID2emailID = new ConcurrentHashMap<>();
 	//public static ConcurrentHashMap<String, InetAddress> hashID2sysIPMap= new ConcurrentHashMap<>();
 	//public static ConcurrentHashMap<String, InetAddress> hashID2mobIPMap= new ConcurrentHashMap<>();
 	public static UserDatabaseHandler db = new UserDatabaseHandler();

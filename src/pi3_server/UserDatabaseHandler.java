@@ -17,7 +17,7 @@ public class UserDatabaseHandler {
 							+" id integer PRIMARY KEY, \n"
 							+" hashid text, \n"
 							+" username text, \n"
-							+" password text \n"
+							+" password text, \n"
 							+" email text \n"
 							+" );";
 							
