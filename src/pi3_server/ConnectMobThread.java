@@ -1,6 +1,7 @@
 package pi3_server;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,6 +28,7 @@ class ConnectMobThread extends Thread{
 			inMob = connMobSock.getInputStream();
 			DataInputStream dInMob = new DataInputStream(inMob);
 			OutputStream outMob = connMobSock.getOutputStream();
+			DataOutputStream dOutMob = new DataOutputStream(outMob);
 			
 			String hashID = dInMob.readUTF();
 			Date date = new Date();
@@ -116,7 +118,9 @@ class ConnectMobThread extends Thread{
 			InetAddress mobIP = connMobSock.getInetAddress();
 			InetAddress sysIP = connSysThread.connSysSock.getInetAddress();
 			
-			
+			if (Main.mobIP2sysIP.containsKey(mobIP)){
+				Thread.sleep(10000);
+			}
 			Main.mobIP2sysIP.put(mobIP, sysIP);
 			System.out.println("ConnectMobThread MobIP : " + mobIP + " SysIP : " + sysIP);
 			Main.sysIP2mobIP.put(sysIP, mobIP);
@@ -126,16 +130,19 @@ class ConnectMobThread extends Thread{
 			
 			outMob.write(9);  // Connection successful
 			
-			connMobSock.setSoTimeout(2000);
+			dOutMob.writeUTF(connSysThread.sysLocalIP);
+			dOutMob.flush();
+			
+			//connMobSock.setSoTimeout(2000);
 			while(true){
 				outMob.write(1);
 				outMob.flush();
-				try{
+				/*try{
 					inMob.read();
 				}catch(SocketTimeoutException e){
 					//e.printStackTrace();
 					continue;
-				}
+				}*/
 				Thread.sleep(10000);
 			}
 			

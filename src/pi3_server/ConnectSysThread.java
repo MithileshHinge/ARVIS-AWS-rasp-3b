@@ -13,7 +13,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class ConnectSysThread extends Thread{
 	public Socket connSysSock;
-	public String hashID;
+	public String hashID, sysLocalIP;
 	volatile public String username, password, fcm_token , emailId;
 	volatile public CountDownLatch latch = new CountDownLatch(1);
 	
@@ -43,18 +43,19 @@ public class ConnectSysThread extends Thread{
 					
 					Main.connSysThreadsMap.put(hashID, this);
 					
+					sysLocalIP = dinSys.readUTF();
+					
 					// Check if connection is alive every 10 seconds
-
 					connSysSock.setSoTimeout(1000);
 					while(true){
 						outSys.write(1);
 						outSys.flush();
-						try{
+						/*try{
 							inSys.read();
 						}catch(SocketTimeoutException e){
 							e.printStackTrace();
 							continue;
-						}
+						}*/
 						Thread.sleep(10000);
 					}
 					
@@ -79,19 +80,20 @@ public class ConnectSysThread extends Thread{
 				doutSys.writeUTF(emailId);
 				System.out.println("FCM Token : " + fcm_token);
 				System.out.println("..................emailId............. = " + emailId);
-				//TODO - send fcm token to system
+				
+				sysLocalIP = dinSys.readUTF();
 				
 				// Check if connection is alive every 10 seconds
 				connSysSock.setSoTimeout(1000);
 				while(true){
 					outSys.write(1);
 					outSys.flush();
-					try{
+					/*try{
 						inSys.read();
 					}catch(SocketTimeoutException e){
 						e.printStackTrace();
 						continue;
-					}
+					}*/
 					Thread.sleep(10000);
 				}
 			}

@@ -98,8 +98,8 @@ public class MessageThread extends Thread {
 				sockSys.getOutputStream().flush();
 				System.out.println("............................msg thread - byte sent to sys.................");
 				
-				sockSys.getInputStream().read(); //TODO: Error handling can be implemented here (different bytes received for different errors/response, e.g. 1=SUCCESS)
-				System.out.println("............................msg thread - ack received from sys.................");
+				int ptemp = sockSys.getInputStream().read(); //TODO: Error handling can be implemented here (different bytes received for different errors/response, e.g. 1=SUCCESS)
+				System.out.println("............................msg thread - ack received from sys................." + ptemp);
 				
 				sockMob.getOutputStream().write(1);
 				sockMob.getOutputStream().flush();
