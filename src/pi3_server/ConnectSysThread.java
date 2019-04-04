@@ -30,33 +30,44 @@ public class ConnectSysThread extends Thread{
 			hashID = dinSys.readUTF();
 			Date date = new Date();
 			System.out.println(Main.ft.format(date)+"	hash id from sys = "+ hashID);
+			while(Main.connSysThreadsMap.containsKey(hashID)){
+				if (Main.connSysThreadsMap.get(hashID).latch.getCount() > 0)
+					Main.connSysThreadsMap.get(hashID).latch.countDown();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			outSys.write(0);
+			outSys.flush();
 			if (Main.db.checkRegistered(hashID)){
 				String username = dinSys.readUTF();
 				String password = dinSys.readUTF();
-				outSys.write(0);
-				outSys.flush();
+				
 				if (Main.db.verifyUser(username, password, hashID)){
 //					MergeThread mergeThread = new MergeThread();
 //					mergeThread.sysIP = connSysSock.getInetAddress();
 //					mergeThread.run();
 //					mergeThreadsMap.put(hashID, mergeThread);	
-					
+					outSys.write(0);
+					outSys.flush();
 					Main.connSysThreadsMap.put(hashID, this);
 					
 					sysLocalIP = dinSys.readUTF();
-					
+					System.out.println("....System local IP = "+sysLocalIP);
 					// Check if connection is alive every 10 seconds
-					connSysSock.setSoTimeout(1000);
+					connSysSock.setSoTimeout(12000);
 					while(true){
 						outSys.write(1);
 						outSys.flush();
-						/*try{
-							inSys.read();
-						}catch(SocketTimeoutException e){
+						int p = inSys.read();
+						if (p == -1) break;
+						try {
+							Thread.sleep(10000);
+						} catch (InterruptedException e) {
 							e.printStackTrace();
-							continue;
-						}*/
-						Thread.sleep(10000);
+						}
 					}
 					
 				}else {
@@ -72,7 +83,12 @@ public class ConnectSysThread extends Thread{
 				
 				Main.connSysThreadsMap.put(hashID, this);
 				
-				latch.await();
+				
+				try {
+					latch.await();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 				
 				doutSys.writeUTF(username);
 				doutSys.writeUTF(password);
@@ -84,52 +100,51 @@ public class ConnectSysThread extends Thread{
 				sysLocalIP = dinSys.readUTF();
 				
 				// Check if connection is alive every 10 seconds
-				connSysSock.setSoTimeout(1000);
+				connSysSock.setSoTimeout(12000);
 				while(true){
 					outSys.write(1);
 					outSys.flush();
-					/*try{
-						inSys.read();
-					}catch(SocketTimeoutException e){
+					int p = inSys.read();
+					if (p == -1) break;
+					try{
+						Thread.sleep(10000);
+					}catch (InterruptedException e){
 						e.printStackTrace();
-						continue;
-					}*/
-					Thread.sleep(10000);
+					}
 				}
 			}
-		} catch (IOException | InterruptedException e) {
-			Date date = new Date();
-			System.out.println(Main.ft.format(date) + "System disconnected");
-			InetAddress sysIp = connSysSock.getInetAddress();
-			if (sysIp != null){
-				InetAddress mobIP = Main.sysIP2mobIP.get(sysIp);
-				if (mobIP != null){
-					Main.mobIP2sysIP.remove(mobIP);
-				}
-				Main.sysIP2mobIP.remove(sysIp);
-				ServerSockThread.sysIP2MessageSockMap.remove(sysIp);
-				ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIp);
-			}
-			
-			
-			
-			try {
-				connSysSock.close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			if (hashID != null)
-				Main.connSysThreadsMap.remove(hashID);
+		} catch (IOException | NullPointerException e) {
 			e.printStackTrace();
-			
-			// Notify mob that system is disconnected
-			SendMail sendmail = new SendMail();
-			sendmail.sendMailTo = Main.db.getEmail(hashID);
-			sendmail.sendmail = true;
-			sendmail.start();
-			
-			System.out.println("sendMailTo = "+sendmail.sendMailTo);
-			
 		}
+		
+		Date date = new Date();
+		System.out.println(Main.ft.format(date) + "System disconnected");
+		InetAddress sysIp = connSysSock.getInetAddress();
+		if (sysIp != null){
+			InetAddress mobIP = Main.sysIP2mobIP.get(sysIp);
+			if (mobIP != null){
+				Main.mobIP2sysIP.remove(mobIP);
+			}
+			Main.sysIP2mobIP.remove(sysIp);
+			ServerSockThread.sysIP2MessageSockMap.remove(sysIp);
+			ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIp);
+		}
+		
+		try {
+			connSysSock.close();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		if (hashID != null)
+			Main.connSysThreadsMap.remove(hashID);
+		
+		
+		// Notify mob that system is disconnected
+		SendMail sendmail = new SendMail();
+		sendmail.sendMailTo = Main.db.getEmail(hashID);
+		sendmail.sendmail = true;
+		sendmail.start();
+		
+		System.out.println("sendMailTo = "+sendmail.sendMailTo);
 	}
 }

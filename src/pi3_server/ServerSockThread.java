@@ -100,24 +100,29 @@ public class ServerSockThread extends Thread {
 									
 									ExchangeFrame.sysIP2MobUdpPortMap.put(sysIP2, udpPort);
 
-									try{
-										while(true){
+									while(true){
+										try{
+											int p = sock.getInputStream().read();
+											if (p == -1) break;
 											sock.getOutputStream().write(1);
 											sock.getOutputStream().flush();
+											
 											try {
 												Thread.sleep(2000);
 											} catch (InterruptedException e) {
 												e.printStackTrace();
 											}
+											
+										} catch (IOException e1) {
+											e1.printStackTrace();
+											break;
 										}
-									} catch (IOException e1) {
-										System.out.println("Livefeed stopped!!!");
-										ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
-										Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
-										sysLivefeedSock.close();
-										e1.printStackTrace();
-										return;
 									}
+									
+									System.out.println("Livefeed stopped!!!");
+									ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
+									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
+									sysLivefeedSock.close();
 									/*
 									System.out.println("Livefeed stopped weirdly!!!@@@@@@@@@@@@@@@@@@");
 									ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);

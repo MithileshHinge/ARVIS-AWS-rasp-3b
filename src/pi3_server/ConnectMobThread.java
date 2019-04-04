@@ -119,7 +119,11 @@ class ConnectMobThread extends Thread{
 			InetAddress sysIP = connSysThread.connSysSock.getInetAddress();
 			
 			if (Main.mobIP2sysIP.containsKey(mobIP)){
-				Thread.sleep(10000);
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 			Main.mobIP2sysIP.put(mobIP, sysIP);
 			System.out.println("ConnectMobThread MobIP : " + mobIP + " SysIP : " + sysIP);
@@ -130,45 +134,54 @@ class ConnectMobThread extends Thread{
 			
 			outMob.write(9);  // Connection successful
 			
+			while (connSysThread.sysLocalIP == null){
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 			dOutMob.writeUTF(connSysThread.sysLocalIP);
 			dOutMob.flush();
 			
-			//connMobSock.setSoTimeout(2000);
+			connMobSock.setSoTimeout(12000);
 			while(true){
 				outMob.write(1);
 				outMob.flush();
-				/*try{
-					inMob.read();
-				}catch(SocketTimeoutException e){
-					//e.printStackTrace();
-					continue;
-				}*/
-				Thread.sleep(10000);
+				int p = inMob.read();
+				if (p == -1) break;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 			
-		} catch (IOException | InterruptedException e) {
-			Date date = new Date();
-			System.out.println(Main.ft.format(date)+"Mobile disconnected ");
-			InetAddress mobIP = connMobSock.getInetAddress();
-			System.out.println("IN ConnectMobThread mobIP : " + mobIP);
-			if (mobIP != null){
-				
-				InetAddress sysIP = Main.mobIP2sysIP.get(mobIP);
-				System.out.print("sysIP : " + sysIP);
-				if (sysIP != null){
-					Main.sysIP2mobIP.remove(sysIP);
-					ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP);
-					ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(mobIP);
-					//TODO - do for exchange audio
-				}	
-				Main.mobIP2sysIP.remove(mobIP);
-			}
-			try {
-				connMobSock.close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		Date date = new Date();
+		System.out.println(Main.ft.format(date)+"Mobile disconnected ");
+		InetAddress mobIP = connMobSock.getInetAddress();
+		System.out.println("IN ConnectMobThread mobIP : " + mobIP);
+		if (mobIP != null){
+			
+			InetAddress sysIP = Main.mobIP2sysIP.get(mobIP);
+			System.out.print("sysIP : " + sysIP);
+			if (sysIP != null){
+				Main.sysIP2mobIP.remove(sysIP);
+				ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP);
+				ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(mobIP);
+				//TODO - do for exchange audio
+			}	
+			Main.mobIP2sysIP.remove(mobIP);
+		}
+		try {
+			connMobSock.close();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
 	}
 }
