@@ -25,9 +25,12 @@ public class ServerSockThread extends Thread {
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2AudioSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2VideoSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	
+	public static ConcurrentHashMap<InetAddress, Socket> sysIP2ListenSockMap = new ConcurrentHashMap<InetAddress, Socket>();
+	
 	private ServerSocket ss;
 	private int port;
 	public static int udpAudioSysLocalPort;
+	public static int udpListenMobLocalPort;
 	
 	ServerSockThread(int port) throws IOException{
 		this.port = port;
@@ -334,6 +337,80 @@ public class ServerSockThread extends Thread {
 								} catch (IOException e) {
 									e.printStackTrace();
 								}
+								break;
+							case Main.PORT_LISTEN_TCP_SYS:
+								sysIP2ListenSockMap.put(sock.getInetAddress(), sock);
+								try {
+									 
+									int i = sock.getInputStream().read();
+									
+									if(i == 2){
+										// initial exchange of stuff
+										System.out.println("....recvd = 2...for listen");
+										
+										sock.getOutputStream().write(1);
+										sock.getOutputStream().flush();
+										sock.getInputStream().read();
+									}/*else if(i == 1){
+										//normal exchange while exchange listen packets
+										System.out.println("....recvd = 1...for listen");
+									}*/
+									System.out.println(".....listen port exchg complete................................!!...............");
+									
+									
+								} catch (IOException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+								break;
+							case Main.PORT_LISTEN_TCP_MOB:
+								try {
+									System.out.println("In serverSock listen TCP Mob");
+									InputStream mobIn = sock.getInputStream();
+									OutputStream mobOut = sock.getOutputStream();
+									
+									InetAddress sysIP1 = Main.mobIP2sysIP.get(sock.getInetAddress());
+									if (sysIP1 == null){
+										System.out.println("System not connected!!");
+										mobOut.write(0);
+										sock.close();
+										return;
+									}
+									udpListenMobLocalPort = new DataInputStream(sock.getInputStream()).readInt();
+									mobOut.write(1);
+									ExchangeListen.sysIP2MobUdpPortListenMap.put(sysIP1 ,udpListenMobLocalPort);
+									System.out.println("In serverSock mobIP : " + sock.getInetAddress()  );
+									System.out.println("sysIP : " + sysIP1);
+									System.out.println("Udp Port recieved : " + udpListenMobLocalPort);
+									
+									while(true){
+										try{
+											int p = sock.getInputStream().read();
+											if (p == -1) break;
+											sock.getOutputStream().write(1);
+											sock.getOutputStream().flush();
+											
+											try {
+												Thread.sleep(2000);
+											} catch (InterruptedException e) {
+												e.printStackTrace();
+											}
+											
+										} catch (IOException e1) {
+											e1.printStackTrace();
+											break;
+										}
+									}
+									System.out.println("Listening stopped!!");
+									ExchangeListen.sysIP2MobUdpPortListenMap.remove(sysIP1);
+									Socket sysListenSock = sysIP2ListenSockMap.get(sysIP1);
+									sysListenSock.close();
+									
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+								
+								
 								break;
 							}
 					}
