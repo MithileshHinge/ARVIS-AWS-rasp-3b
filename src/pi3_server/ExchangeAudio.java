@@ -104,7 +104,7 @@ public class ExchangeAudio extends Thread{
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
-				            System.out.println(".....audio packet sent...................................port = "+ServerSockThread.udpAudioSysLocalPort);
+				            System.out.println(".....audio packet sent...................................port = "+remoteUDPPort);
 		            	}
 		            }).start();
 	            }catch (SocketTimeoutException s) {

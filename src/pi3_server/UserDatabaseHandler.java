@@ -138,4 +138,21 @@ public class UserDatabaseHandler {
 
 		return null;
 	}
+	
+	public String[] getEntryFromHashID(String hashid){
+		try (Connection conn = DriverManager.getConnection(url)){
+			String checkRegistered = "SELECT * FROM " + TABLE_NAME + " WHERE hashid = ?;";
+			PreparedStatement pst = conn.prepareStatement(checkRegistered);
+			pst.setString(1, hashid);
+			
+			ResultSet rs = pst.executeQuery();
+			if (rs.next()){
+				return new String[]{rs.getString("hashid"), rs.getString("username"), rs.getString("password"), rs.getString("email")};
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
 }

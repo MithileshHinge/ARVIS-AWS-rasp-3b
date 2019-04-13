@@ -27,7 +27,6 @@ public class ServerSockThread extends Thread {
 	
 	private ServerSocket ss;
 	private int port;
-	public static int udpAudioSysLocalPort;
 	
 	ServerSockThread(int port) throws IOException{
 		this.port = port;
@@ -136,7 +135,8 @@ public class ServerSockThread extends Thread {
 							case Main.PORT_AUDIO_TCP_SYS:
 								sysIP2AudioSockMap.put(sock.getInetAddress(), sock);
 								try {
-									InetAddress mobIP2 = Main.sysIP2mobIP.get(sock.getInetAddress()); 
+									InetAddress mobIP2 = Main.sysIP2mobIP.get(sock.getInetAddress());
+									int udpAudioSysLocalPort = -1;
 									int i = sock.getInputStream().read();
 									if(i == 2){
 										// initial exchange of stuff

