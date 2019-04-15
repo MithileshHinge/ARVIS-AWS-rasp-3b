@@ -99,21 +99,36 @@ public class ServerSockThread extends Thread {
 									}
 									
 									ExchangeFrame.sysIP2MobUdpPortMap.put(sysIP2, udpPort);
-									try{
-										sockIn.read();
-									} catch (IOException e1) {
-										System.out.println("Livefeed stopped!!!");
-										ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
-										Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
-										sysLivefeedSock.close();
-										e1.printStackTrace();
-										return;
+
+									while(true){
+										try{
+											int p = sock.getInputStream().read();
+											if (p == -1) break;
+											sock.getOutputStream().write(1);
+											sock.getOutputStream().flush();
+											
+											try {
+												Thread.sleep(2000);
+											} catch (InterruptedException e) {
+												e.printStackTrace();
+											}
+											
+										} catch (IOException e1) {
+											e1.printStackTrace();
+											break;
+										}
 									}
 									
+									System.out.println("Livefeed stopped!!!");
+									ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
+									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
+									sysLivefeedSock.close();
+									/*
 									System.out.println("Livefeed stopped weirdly!!!@@@@@@@@@@@@@@@@@@");
 									ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
 									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
 									sysLivefeedSock.close();
+									*/
 								} catch (IOException e1) {
 									e1.printStackTrace();
 								}
@@ -162,18 +177,18 @@ public class ServerSockThread extends Thread {
 									mobIn.read();
 									mobOut.write(2);
 									try{
-										mobIn.read();
+										while (true){
+											mobOut.write(1);
+											mobOut.flush();
+										}
 									}catch(IOException e){
 										System.out.println("Sending Audio stopped!!");
 										ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(sock.getInetAddress());
 										Socket sysAudioSock = sysIP2AudioSockMap.get(sysIP1);
 										sysAudioSock.close();
 										e.printStackTrace();
+										return;
 									}
-									System.out.println("Sending Audio stopped!!");
-									ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(sock.getInetAddress());
-									Socket sysAudioSock = sysIP2AudioSockMap.get(sysIP1);
-									sysAudioSock.close();
 								} catch (IOException e) {
 									e.printStackTrace();
 								}
