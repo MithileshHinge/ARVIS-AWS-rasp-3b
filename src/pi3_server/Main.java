@@ -43,7 +43,7 @@ public class Main {
 			BYTE_ABRUPT_END = 5, 
 			BYTE_LIGHT_CHANGE = 6;
 
-	public static ExchangeFrame exchangeFrame;
+	//public static ExchangeFrame exchangeFrame;
 	//public static ConcurrentHashMap<String, MergeThread> mergeThreadsMap = new ConcurrentHashMap<>();
 	//public static ConcurrentHashMap<InetAddress, Socket> mobIP2connMobSock = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress, InetAddress> mobIP2sysIP = new ConcurrentHashMap<>();
@@ -121,13 +121,13 @@ public class Main {
 		
 		
 		
-		try {
+		/*try {
 			exchangeFrame = new ExchangeFrame();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 			return;
 		}
-		exchangeFrame.start();
+		exchangeFrame.start();*/
 		
 		while(true){
 			

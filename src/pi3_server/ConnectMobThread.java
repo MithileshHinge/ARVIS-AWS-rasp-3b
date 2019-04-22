@@ -171,8 +171,8 @@ class ConnectMobThread extends Thread{
 			System.out.print("sysIP : " + sysIP);
 			if (sysIP != null){
 				Main.sysIP2mobIP.remove(sysIP);
-				ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP);
-				ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(mobIP);
+				//ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP);
+				//ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(mobIP);
 				//TODO - do for exchange audio
 			}	
 			Main.mobIP2sysIP.remove(mobIP);
