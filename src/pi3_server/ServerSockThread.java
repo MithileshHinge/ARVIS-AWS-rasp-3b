@@ -23,7 +23,7 @@ public class ServerSockThread extends Thread {
 
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2MessageSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	//public static ConcurrentHashMap<InetAddress, Socket> mobIP2MessageSockMap = new ConcurrentHashMap<InetAddress, Socket>();
-	public static ConcurrentHashMap<InetAddress, Socket> sysIP2LivefeedSockMap = new ConcurrentHashMap<InetAddress, Socket>();
+	public static ConcurrentHashMap<String, Socket> hashID2LivefeedSockMap = new ConcurrentHashMap<String, Socket>();
 	public static ConcurrentHashMap<InetAddress, SysUDPInfo> sysIP2SysLivefeedUDPInfoMap = new ConcurrentHashMap<InetAddress, SysUDPInfo>();
 	//public static ConcurrentHashMap<InetAddress, Socket> mobIP2LivefeedSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2AudioSockMap = new ConcurrentHashMap<InetAddress, Socket>();
@@ -36,7 +36,12 @@ public class ServerSockThread extends Thread {
 	
 	ServerSockThread(int port) throws IOException{
 		this.port = port;
+		if(port == Main.PORT_LIVEFEED_TCP_SYS || port == Main.PORT_LIVEFEED_TCP_MOB){
+			ss = new ServerSocket(port,10,InetAddress.getByName(Main.ipv6));
+			
+		}else{
 		ss = new ServerSocket(port);
+		}
 	}
 	
 	public void run(){
@@ -75,36 +80,16 @@ public class ServerSockThread extends Thread {
 								break;
 							}
 							case Main.PORT_LIVEFEED_TCP_SYS:{
-								sysIP2LivefeedSockMap.put(sock.getInetAddress(), sock);
-								DatagramSocket ds = null;
 								try {
-									ds = new DatagramSocket();
 									DataInputStream din = new DataInputStream(sock.getInputStream());
 									DataOutputStream dout = new DataOutputStream(sock.getOutputStream());
-									dout.writeInt(ds.getLocalPort());
-									dout.flush();
-									byte[] buf = new byte[2];
-									DatagramPacket packet = new DatagramPacket(buf, buf.length);
-									ds.setSoTimeout(5000);
-									ds.receive(packet);
-									for (int i=0; i<10; i++){
-										ds.send(new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort()));
-									}
-									String sysLocaIP = din.readUTF();
-									int sysLocalUDPPort = din.readInt();
-									
-									System.out.println("SYS Livefeed Datagram public IP: " + packet.getAddress() + " public port: " + packet.getPort());
-									System.out.println("SYS Livefeed Datagram private IP: " + sysLocaIP + " private port: " + sysLocalUDPPort);
-									//DataInputStream din = new DataInputStream(sock.getInputStream());
-									//String hashID = din.readUTF();
+									String hashID = din.readUTF();
 									
 									//InetSocketAddress addr = new InetSocketAddress(packet.getAddress(), packet.getPort());
-									sysIP2SysLivefeedUDPInfoMap.put(sock.getInetAddress(), new SysUDPInfo(packet.getAddress(), packet.getPort(), InetAddress.getByName(sysLocaIP), sysLocalUDPPort));
-									ds.close();
+									hashID2LivefeedSockMap.put(hashID, sock);
 								} catch (IOException e) {
 									e.printStackTrace();
 									try {
-										ds.close();
 										sock.close();
 									} catch (IOException e1) {
 										e1.printStackTrace();
@@ -114,16 +99,22 @@ public class ServerSockThread extends Thread {
 							}
 							case Main.PORT_LIVEFEED_TCP_MOB:{
 								//mobIP2LivefeedSockMap.put(sock.getInetAddress(), sock);
-								DatagramSocket ds = null;
 								try {
 									InputStream sockIn = sock.getInputStream();
-									InetAddress mobIP = sock.getInetAddress();
+									String mobIPv6 = sock.getInetAddress().getHostAddress();
 									DataInputStream din = new DataInputStream(sockIn);
 									DataOutputStream dout = new DataOutputStream(sock.getOutputStream());
+									String hashID = din.readUTF();
+									int mobUdpPort = din.readInt();
 									
-									InetAddress sysIP = Main.mobIP2sysIP.get(mobIP);
-									if (sysIP == null){
-										System.out.println("Mobile with this IP has never initiated ConnectMob method OR Corresponding System is offline");
+									
+									Socket sysLivefeedSock = hashID2LivefeedSockMap.remove(hashID);
+									long time1 = System.currentTimeMillis();
+									while (System.currentTimeMillis() - time1 < 2000 && sysLivefeedSock == null){
+										sysLivefeedSock = hashID2LivefeedSockMap.remove(hashID);
+									}
+									if (sysLivefeedSock == null){
+										System.out.println("System is offline");
 										
 										sock.getOutputStream().write(0);
 										sock.getOutputStream().flush();
@@ -135,57 +126,13 @@ public class ServerSockThread extends Thread {
 										return;
 									}
 									
-									
 									sock.getOutputStream().write(1);
 									sock.getOutputStream().flush();
 									
-									long time1 = System.currentTimeMillis();
-									SysUDPInfo sysLivefeedUdpInfo = null;
-									while(System.currentTimeMillis() - time1 < 2000 && sysLivefeedUdpInfo == null){
-										sysLivefeedUdpInfo = sysIP2SysLivefeedUDPInfoMap.remove(sysIP);
-									}
-									if (sysLivefeedUdpInfo == null){
-										System.out.println("POSSIBLE ATTACK! No corresponding system livefeed UDP socket found.");
-										sock.close();
-										return;
-									}
-									
-									ds = new DatagramSocket();
-									dout.writeInt(ds.getLocalPort());
+									DataOutputStream doutSys = new DataOutputStream(sysLivefeedSock.getOutputStream());
+									doutSys.writeInt(mobUdpPort);
+									doutSys.writeUTF(mobIPv6);
 									dout.flush();
-									
-									byte[] buf = new byte[2];
-									DatagramPacket packet = new DatagramPacket(buf, buf.length);
-									ds.setSoTimeout(5000);
-									ds.receive(packet);
-									for (int i=0; i<10; i++){
-										ds.send(new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort()));
-									}
-									System.out.println("MOB Livefeed Datagram IP: " + packet.getAddress() + " port: " + packet.getPort());
-									ds.close();
-									
-									String mobLocalIP = din.readUTF();
-									int mobLocalPort = din.readInt();
-									
-									Socket syslivefeedTCPSock = sysIP2LivefeedSockMap.get(sysIP);
-									DataOutputStream doutSys = new DataOutputStream(syslivefeedTCPSock.getOutputStream());
-									
-									if (sysIP.getHostAddress().equals(sock.getInetAddress().getHostAddress())){
-										//System and mobile on same network, send localIP
-										dout.writeUTF(sysLivefeedUdpInfo.localIP.getHostAddress());
-										dout.writeInt(sysLivefeedUdpInfo.localPort);
-										dout.flush();
-										doutSys.writeUTF(mobLocalIP);
-										doutSys.writeInt(mobLocalPort);
-										doutSys.flush();
-									}else {
-										dout.writeUTF(sysLivefeedUdpInfo.publicIP.getHostAddress());
-										dout.writeInt(sysLivefeedUdpInfo.publicPort);
-										dout.flush();
-										doutSys.writeUTF(packet.getAddress().getHostAddress());
-										doutSys.writeInt(packet.getPort());
-										doutSys.flush();
-									}
 									
 									//ExchangeFrame.sysIP2MobUdpPortMap.put(sysIP2, udpPort);
 
@@ -210,8 +157,6 @@ public class ServerSockThread extends Thread {
 									
 									System.out.println("Livefeed stopped!!!");
 									//ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP);
-									sysIP2SysLivefeedUDPInfoMap.remove(sysIP);
-									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP);
 									sysLivefeedSock.close();
 									/*
 									System.out.println("Livefeed stopped weirdly!!!@@@@@@@@@@@@@@@@@@");
@@ -222,8 +167,6 @@ public class ServerSockThread extends Thread {
 								} catch (IOException e) {
 									e.printStackTrace();
 									try {
-										if (ds != null)
-											ds.close();
 										sock.close();
 									} catch (IOException e1) {
 										e1.printStackTrace();

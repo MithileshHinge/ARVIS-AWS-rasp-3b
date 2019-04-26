@@ -59,6 +59,7 @@ public class Main {
 	public static volatile Socket sockGPU = null;
 	public static ServerSocket ssGPU2;
 	public static SimpleDateFormat ft = new SimpleDateFormat("yyyy_MM_dd'at'hh_mm_ss_a");
+	public static String ipv6 = "2406:da1a:58f:da12:2251:bc86:f6b7:227e";
 	
 	public static void main(String[] args) {
 		
