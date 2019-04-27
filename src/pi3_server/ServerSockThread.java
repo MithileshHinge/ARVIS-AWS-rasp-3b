@@ -22,12 +22,8 @@ import javax.imageio.ImageIO;
 public class ServerSockThread extends Thread {
 
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2MessageSockMap = new ConcurrentHashMap<InetAddress, Socket>();
-	//public static ConcurrentHashMap<InetAddress, Socket> mobIP2MessageSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	public static ConcurrentHashMap<String, Socket> hashID2LivefeedSockMap = new ConcurrentHashMap<String, Socket>();
-	public static ConcurrentHashMap<InetAddress, SysUDPInfo> sysIP2SysLivefeedUDPInfoMap = new ConcurrentHashMap<InetAddress, SysUDPInfo>();
-	//public static ConcurrentHashMap<InetAddress, Socket> mobIP2LivefeedSockMap = new ConcurrentHashMap<InetAddress, Socket>();
-	public static ConcurrentHashMap<InetAddress, Socket> sysIP2AudioSockMap = new ConcurrentHashMap<InetAddress, Socket>();
-	public static ConcurrentHashMap<InetAddress, SysUDPInfo> sysIP2SysAudioUDPInfoMap = new ConcurrentHashMap<InetAddress, SysUDPInfo>();
+	public static ConcurrentHashMap<String, Socket> hashID2AudioSockMap = new ConcurrentHashMap<String, Socket>();
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2VideoSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	
 	private ServerSocket ss;
@@ -176,56 +172,15 @@ public class ServerSockThread extends Thread {
 								break;
 							}
 							case Main.PORT_AUDIO_TCP_SYS:{
-								sysIP2AudioSockMap.put(sock.getInetAddress(), sock);
-								DatagramSocket ds = null;
 								try {
-									InetAddress mobIP = Main.sysIP2mobIP.get(sock.getInetAddress());
-									int p = sock.getInputStream().read();
-									if(p == 2 && mobIP != null){
-										// initial exchange of stuff
-										System.out.println("....recvd = 2...for audio");
-										//udpAudioSysLocalPort = new DataInputStream(sock.getInputStream()).readInt();
-										
-										sock.getOutputStream().write(1);
-										sock.getOutputStream().flush();
-										sock.getInputStream().read();
-									}else {
-										sock.close();
-										return;
-									}
-										/*else if(i == 1){
-									
-										//normal exchange while exchange audio packets
-										System.out.println("....recvd = 1...for audio");
-									}*/
-									ds = new DatagramSocket();
 									DataInputStream din = new DataInputStream(sock.getInputStream());
-									DataOutputStream dout = new DataOutputStream(sock.getOutputStream());
-									dout.writeInt(ds.getLocalPort());
-									dout.flush();
-									
-									byte[] buf = new byte[2];
-									DatagramPacket packet = new DatagramPacket(buf, buf.length);
-									ds.setSoTimeout(5000);
-									ds.receive(packet);
-									for (int i=0; i<10; i++){
-										ds.send(new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort()));
-									}
-									ds.close();
-									String sysLocaIP = din.readUTF();
-									int sysLocalUDPPort = din.readInt();
-									
-									System.out.println("SYS Audio Datagram public IP: " + packet.getAddress() + " public port: " + packet.getPort());
-									System.out.println("SYS Audio Datagram private IP: " + sysLocaIP + " private port: " + sysLocalUDPPort);
-									
-									sysIP2SysAudioUDPInfoMap.put(sock.getInetAddress(), new SysUDPInfo(packet.getAddress(), packet.getPort(), InetAddress.getByName(sysLocaIP), sysLocalUDPPort));
-									
-									System.out.println(".....Audio port exchg complete................................!!...............");
+									String hashID = din.readUTF();
+									hashID2AudioSockMap.put(hashID, sock);
+									System.out.println(".....SysAudioSock added to map................................!!...............");
 									//ExchangeAudio.mobIP2SysAudioUdpPortMap.put(mobIP2,udpAudioSysLocalPort);
 								} catch (IOException e) {
 									e.printStackTrace();
 									try {
-										ds.close();
 										sock.close();
 									} catch (IOException e1) {
 										e1.printStackTrace();
@@ -234,73 +189,46 @@ public class ServerSockThread extends Thread {
 								break;
 							}
 							case Main.PORT_AUDIO_TCP_MOB:{
-								DatagramSocket ds = null;
 								try {
 									System.out.println("In serverSock Audio TCP Mob");
 									InputStream mobIn = sock.getInputStream();
 									OutputStream mobOut = sock.getOutputStream();
 									
-									mobIn.read();
-									mobOut.write(2);
-									mobOut.flush();
-									
 									DataInputStream din = new DataInputStream(mobIn);
 									DataOutputStream dout = new DataOutputStream(mobOut);
 									
-									InetAddress sysIP = Main.mobIP2sysIP.get(sock.getInetAddress());
-									if (sysIP == null){
-										System.out.println("System not connected!!");
-										sock.close();
-										return;
-									}
+									String hashID = din.readUTF();
 									
+									Socket sysAudioSock = hashID2AudioSockMap.remove(hashID);
 									long time1 = System.currentTimeMillis();
-									SysUDPInfo sysAudioUdpInfo = null;
-									while(System.currentTimeMillis() - time1 < 2000 && sysAudioUdpInfo == null){
-										sysAudioUdpInfo = sysIP2SysAudioUDPInfoMap.remove(sysIP);
+									while (System.currentTimeMillis() - time1 < 2000 && sysAudioSock == null){
+										sysAudioSock = hashID2AudioSockMap.remove(hashID);
 									}
-									if (sysAudioUdpInfo == null){
-										System.out.println("POSSIBLE ATTACK! No corresponding system audio UDP socket found.");
-										sock.close();
+									if (sysAudioSock == null){
+										System.out.println("System is offline");
+										
+										sock.getOutputStream().write(0);
+										sock.getOutputStream().flush();
+										try {
+											sock.close();
+										} catch (IOException e) {
+											e.printStackTrace();
+										}
 										return;
 									}
 									
-									ds = new DatagramSocket();
-									dout.writeInt(ds.getLocalPort());
+									sock.getOutputStream().write(2);
+									sock.getOutputStream().flush();
+									
+									DataInputStream dinSys = new DataInputStream(sysAudioSock.getInputStream());
+									String sysLocaIP = sysAudioSock.getInetAddress().getHostAddress();
+									int sysLocalUDPPort = dinSys.readInt();
+									
+									System.out.println("SYS Audio Datagram private IP: " + sysLocaIP + " private port: " + sysLocalUDPPort);
+									
+									dout.writeInt(sysLocalUDPPort);
+									dout.writeUTF(sysLocaIP);
 									dout.flush();
-									
-									byte[] buf = new byte[2];
-									DatagramPacket packet = new DatagramPacket(buf, buf.length);
-									ds.setSoTimeout(5000);
-									ds.receive(packet);
-									for (int i=0; i<10; i++){
-										ds.send(new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort()));
-									}
-									System.out.println("MOB Audio Datagram IP: " + packet.getAddress() + " port: " + packet.getPort());
-									ds.close();
-									
-									String mobLocalIP = din.readUTF();
-									int mobLocalPort = din.readInt();
-									
-									Socket sysAudioTCPSock = sysIP2AudioSockMap.get(sysIP);
-									DataOutputStream doutSys = new DataOutputStream(sysAudioTCPSock.getOutputStream());
-									
-									if (sysIP.getHostAddress().equals(sock.getInetAddress().getHostAddress())){
-										//System and mobile on same network, send localIP
-										dout.writeUTF(sysAudioUdpInfo.localIP.getHostAddress());
-										dout.writeInt(sysAudioUdpInfo.localPort);
-										dout.flush();
-										doutSys.writeUTF(mobLocalIP);
-										doutSys.writeInt(mobLocalPort);
-										doutSys.flush();
-									}else {
-										dout.writeUTF(sysAudioUdpInfo.publicIP.getHostAddress());
-										dout.writeInt(sysAudioUdpInfo.publicPort);
-										dout.flush();
-										doutSys.writeUTF(packet.getAddress().getHostAddress());
-										doutSys.writeInt(packet.getPort());
-										doutSys.flush();
-									}
 									
 									while(true){
 										try{
@@ -323,15 +251,11 @@ public class ServerSockThread extends Thread {
 									
 									System.out.println("Sending Audio stopped!!!");
 									//ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(sock.getInetAddress());
-									sysIP2SysAudioUDPInfoMap.remove(sysIP);
-									Socket sysAudioSock = sysIP2AudioSockMap.get(sysIP);
 									sysAudioSock.close();
 									
 								} catch (IOException e) {
 									e.printStackTrace();
 									try {
-										if (ds != null)
-											ds.close();
 										sock.close();
 									} catch (IOException e1) {
 										e1.printStackTrace();
