@@ -107,7 +107,7 @@ public class ServerSockThread extends Thread {
 									
 									Socket sysLivefeedSock = hashID2LivefeedSockMap.remove(hashID);
 									long time1 = System.currentTimeMillis();
-									while (System.currentTimeMillis() - time1 < 2000 && sysLivefeedSock == null){
+									while (System.currentTimeMillis() - time1 < 10000 && sysLivefeedSock == null){
 										sysLivefeedSock = hashID2LivefeedSockMap.remove(hashID);
 									}
 									if (sysLivefeedSock == null){
@@ -201,7 +201,7 @@ public class ServerSockThread extends Thread {
 									
 									Socket sysAudioSock = hashID2AudioSockMap.remove(hashID);
 									long time1 = System.currentTimeMillis();
-									while (System.currentTimeMillis() - time1 < 2000 && sysAudioSock == null){
+									while (System.currentTimeMillis() - time1 < 10000 && sysAudioSock == null){
 										sysAudioSock = hashID2AudioSockMap.remove(hashID);
 									}
 									if (sysAudioSock == null){
@@ -290,7 +290,7 @@ public class ServerSockThread extends Thread {
 									
 									Socket sysListenSock = hashID2ListenSockMap.remove(hashID);
 									long time1 = System.currentTimeMillis();
-									while (System.currentTimeMillis() - time1 < 2000 && sysListenSock == null){
+									while (System.currentTimeMillis() - time1 < 10000 && sysListenSock == null){
 										sysListenSock = hashID2ListenSockMap.remove(hashID);
 									}
 									if (sysListenSock == null){
