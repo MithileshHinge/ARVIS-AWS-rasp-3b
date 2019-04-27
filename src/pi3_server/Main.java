@@ -31,6 +31,10 @@ public class Main {
 			PORT_AUDIO_TCP_MOB=7670,
 			PORT_AUDIO_UDP_SYS=6671,
 			PORT_AUDIO_UDP_MOB=7671,
+			PORT_LISTEN_TCP_SYS=6675,
+			PORT_LISTEN_TCP_MOB=7675,
+			PORT_LISTEN_UDP_SYS=6673,
+			PORT_LISTEN_UDP_MOB=7673,
 			PORT_PERSON_DETECT_SYS=6672,
 			PORT_PERSON_DETECT_GPU=5672,
 			PORT_PERSON_DETECT_GPU2=5673;
@@ -97,6 +101,8 @@ public class Main {
 			ServerSockThread servSockLivefeedMobThread = new ServerSockThread(PORT_LIVEFEED_TCP_MOB);
 			ServerSockThread servSockAudioSysThread = new ServerSockThread(PORT_AUDIO_TCP_SYS);
 			ServerSockThread servSockAudioMobThread = new ServerSockThread(PORT_AUDIO_TCP_MOB);
+			ServerSockThread servSockListenSysThread = new ServerSockThread(PORT_LISTEN_TCP_SYS);
+			ServerSockThread servSockListenMobThread = new ServerSockThread(PORT_LISTEN_TCP_MOB);
 			ServerSockThread servSockDetectPersonSysThread = new ServerSockThread(PORT_PERSON_DETECT_SYS);
 			ServerSockThread servSockDetectPersonGPUThread = new ServerSockThread(PORT_PERSON_DETECT_GPU);
 			ServerSockThread servSockVideoSysThread = new ServerSockThread(PORT_NOTIF_VIDEO_SYS);
@@ -109,6 +115,8 @@ public class Main {
 			servSockLivefeedMobThread.start();
 			servSockAudioSysThread.start();
 			servSockAudioMobThread.start();
+			servSockListenSysThread.start();
+			servSockListenMobThread.start();
 			servSockDetectPersonSysThread.start();
 			servSockDetectPersonGPUThread.start();
 			servSockVideoSysThread.start();

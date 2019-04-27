@@ -24,6 +24,7 @@ public class ServerSockThread extends Thread {
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2MessageSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	public static ConcurrentHashMap<String, Socket> hashID2LivefeedSockMap = new ConcurrentHashMap<String, Socket>();
 	public static ConcurrentHashMap<String, Socket> hashID2AudioSockMap = new ConcurrentHashMap<String, Socket>();
+	public static ConcurrentHashMap<String, Socket> hashID2ListenSockMap = new ConcurrentHashMap<String, Socket>();
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2VideoSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	
 	private ServerSocket ss;
@@ -177,7 +178,6 @@ public class ServerSockThread extends Thread {
 									String hashID = din.readUTF();
 									hashID2AudioSockMap.put(hashID, sock);
 									System.out.println(".....SysAudioSock added to map................................!!...............");
-									//ExchangeAudio.mobIP2SysAudioUdpPortMap.put(mobIP2,udpAudioSysLocalPort);
 								} catch (IOException e) {
 									e.printStackTrace();
 									try {
@@ -250,9 +250,91 @@ public class ServerSockThread extends Thread {
 									}
 									
 									System.out.println("Sending Audio stopped!!!");
-									//ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(sock.getInetAddress());
 									sysAudioSock.close();
 									
+								} catch (IOException e) {
+									e.printStackTrace();
+									try {
+										sock.close();
+									} catch (IOException e1) {
+										e1.printStackTrace();
+									}
+								}
+								break;
+							}
+							case Main.PORT_LISTEN_TCP_SYS:{
+								try {
+									DataInputStream din = new DataInputStream(sock.getInputStream());
+									String hashID = din.readUTF();
+									
+									hashID2ListenSockMap.put(hashID, sock);
+									System.out.println("SysListenSock added to map...");
+								} catch (IOException e) {
+									e.printStackTrace();
+									try {
+										sock.close();
+									} catch (IOException e1) {
+										e1.printStackTrace();
+									}
+								}
+								break;
+							}
+							case Main.PORT_LISTEN_TCP_MOB:{
+								try {
+									DataInputStream din = new DataInputStream(sock.getInputStream());
+									DataOutputStream dout = new DataOutputStream(sock.getOutputStream());
+									
+									String hashID = din.readUTF();
+									int mobUdpPort = din.readInt();
+									String mobIPv6 = sock.getInetAddress().getHostAddress();
+									
+									Socket sysListenSock = hashID2ListenSockMap.remove(hashID);
+									long time1 = System.currentTimeMillis();
+									while (System.currentTimeMillis() - time1 < 2000 && sysListenSock == null){
+										sysListenSock = hashID2ListenSockMap.remove(hashID);
+									}
+									if (sysListenSock == null){
+										System.out.println("System is offline");
+										
+										sock.getOutputStream().write(0);
+										sock.getOutputStream().flush();
+										try {
+											sock.close();
+										} catch (IOException e) {
+											e.printStackTrace();
+										}
+										return;
+									}
+									
+									sock.getOutputStream().write(1);
+									sock.getOutputStream().flush();
+									
+									DataOutputStream doutSys = new DataOutputStream(sysListenSock.getOutputStream());
+									doutSys.writeInt(mobUdpPort);
+									doutSys.writeUTF(mobIPv6);
+									dout.flush();
+									System.out.println("All exchanged, Listen started!");
+
+									while(true){
+										try{
+											sock.getOutputStream().write(1);
+											sock.getOutputStream().flush();
+											int p = sock.getInputStream().read();
+											if (p == -1) break;
+											
+											try {
+												Thread.sleep(2000);
+											} catch (InterruptedException e) {
+												e.printStackTrace();
+											}
+										} catch (IOException e1) {
+											e1.printStackTrace();
+											break;
+										}
+									}
+									
+									System.out.println("Listen stopped!!!");
+									sysListenSock.close();
 								} catch (IOException e) {
 									e.printStackTrace();
 									try {
