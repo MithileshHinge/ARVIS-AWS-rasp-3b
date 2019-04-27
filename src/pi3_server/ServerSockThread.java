@@ -133,6 +133,7 @@ public class ServerSockThread extends Thread {
 									doutSys.writeInt(mobUdpPort);
 									doutSys.writeUTF(mobIPv6);
 									dout.flush();
+									System.out.println("All exchanged, livefeed started!");
 									
 									//ExchangeFrame.sysIP2MobUdpPortMap.put(sysIP2, udpPort);
 
