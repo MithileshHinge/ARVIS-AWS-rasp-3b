@@ -127,7 +127,7 @@ public class ConnectSysThread extends Thread{
 			}
 			Main.sysIP2mobIP.remove(sysIp);
 			ServerSockThread.sysIP2MessageSockMap.remove(sysIp);
-			ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIp);
+			//ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIp);
 		}
 		
 		try {

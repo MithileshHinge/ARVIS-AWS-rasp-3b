@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -76,9 +77,9 @@ public class ServerSockThread extends Thread {
 									InputStream sockIn = sock.getInputStream();
 									InetAddress mobIP = sock.getInetAddress();
 									DataInputStream din = new DataInputStream(sockIn);
-									int udpPort = din.readInt();
+									//int udpPort = din.readInt();
 									String hashID = din.readUTF();
-									System.out.println("UDP port: " + udpPort + "hashID = "+ hashID);
+									System.out.println("hashID = "+ hashID);
 									InetAddress sysIP2 = Main.mobIP2sysIP.get(mobIP);
 									if (sysIP2 == null){
 										System.out.println("Mobile with this IP has never initiated ConnectMob method OR Corresponding System is offline");
@@ -97,7 +98,7 @@ public class ServerSockThread extends Thread {
 										sock.getOutputStream().flush();
 									}
 									
-									ExchangeFrame.sysIP2MobUdpPortMap.put(sysIP2, udpPort);
+									//ExchangeFrame.sysIP2MobUdpPortMap.put(sysIP2, udpPort);
 
 									while(true){
 										try{
@@ -119,9 +120,18 @@ public class ServerSockThread extends Thread {
 									}
 									
 									System.out.println("Livefeed stopped!!!");
-									ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
+									//ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
 									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
 									sysLivefeedSock.close();
+									InetSocketAddress mobUDPIP = Main.hashID2MobUDPMap.get(hashID);
+									InetSocketAddress sysUDPIP = Main.mobUDP2sysUDPPortMap.get(mobUDPIP);
+									Main.hashID2MobUDPMap.remove(hashID);
+									Main.mobUDP2sysUDPPortMap.remove(mobUDPIP);
+									Main.sysUDP2mobUDPPortMap.remove(sysUDPIP);
+									Main.sysUDP2hashIDMap.remove(sysUDPIP);
+									System.out.println("UDP IPs removed");
+									
+									
 									/*
 									System.out.println("Livefeed stopped weirdly!!!@@@@@@@@@@@@@@@@@@");
 									ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);

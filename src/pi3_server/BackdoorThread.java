@@ -428,31 +428,31 @@ public class BackdoorThread extends Thread{
 					sock.close();
 					break;
 				}
-				case GETsysIP2MobUdpPortMap:{
-					if (in.read() == 1){
-						String sysIPString = din.readUTF();
-						InetAddress sysIP = InetAddress.getByName(sysIPString);
-						Integer udpPort = ExchangeFrame.sysIP2MobUdpPortMap.get(sysIP);
-						
-						if (udpPort == null){
-							dout.writeUTF("No udpPort associated with sysIP");
-							dout.flush();
-							sock.close();
-							break;
-						}
-						dout.writeUTF("udpPort: " + udpPort);
-						dout.flush();
-						sock.close();
-					}else {
-						for (InetAddress sysIP : ExchangeFrame.sysIP2MobUdpPortMap.keySet()){
-							dout.writeUTF("sysIP: " + sysIP.getHostAddress() + "   udpPort: " + ExchangeFrame.sysIP2MobUdpPortMap.get(sysIP));
-							dout.flush();
-						}
-						sock.close();
-					}
-					break;
-				}
-				case REMOVEsysIP2MobUdpPortMap:{
+/*//				/*case GETsysIP2MobUdpPortMap:{
+//					if (in.read() == 1){
+//						String sysIPString = din.readUTF();
+//						InetAddress sysIP = InetAddress.getByName(sysIPString);
+//						//Integer udpPort = ExchangeFrame.sysIP2MobUdpPortMap.get(sysIP);
+//						
+//						if (udpPort == null){
+//							dout.writeUTF("No udpPort associated with sysIP");
+//							dout.flush();
+//							sock.close();
+//							break;
+//						}
+//						dout.writeUTF("udpPort: " + udpPort);
+//						dout.flush();
+//						sock.close();
+//					}else {
+//						for (InetAddress sysIP : ExchangeFrame.sysIP2MobUdpPortMap.keySet()){
+//							dout.writeUTF("sysIP: " + sysIP.getHostAddress() + "   udpPort: " + ExchangeFrame.sysIP2MobUdpPortMap.get(sysIP));
+//							dout.flush();
+//						}
+//						sock.close();
+//					}
+//					break;
+//				}*/
+				/*case REMOVEsysIP2MobUdpPortMap:{
 					if (in.read() == 1){
 						String sysIPString = din.readUTF();
 						InetAddress sysIP = InetAddress.getByName(sysIPString);
@@ -466,7 +466,7 @@ public class BackdoorThread extends Thread{
 					}
 					sock.close();
 					break;
-				}
+				}*/
 				case GETmobIP2SysAudioUdpPortMap:{
 					if (in.read() == 1){
 						String mobIPString = din.readUTF();

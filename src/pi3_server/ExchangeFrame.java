@@ -15,8 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ExchangeFrame extends Thread{
 	
 	//private ServerSocket ssSys, ssMob;
-	private DatagramSocket dsSys, dsMob;
-	public static ConcurrentHashMap<InetAddress, Integer> sysIP2MobUdpPortMap = new ConcurrentHashMap<>();
+	private DatagramSocket dsSys;
+	//public static ConcurrentHashMap<InetAddress, Integer> sysIP2MobUdpPortMap = new ConcurrentHashMap<>();
 	//private Socket sockSys, sockMob;
 	
 	public ExchangeFrame() throws IOException{
@@ -32,7 +32,6 @@ public class ExchangeFrame extends Thread{
 		*/
 		
 		dsSys = new DatagramSocket(Main.PORT_LIVEFEED_UDP_SYS);
-		dsMob = new DatagramSocket(Main.PORT_LIVEFEED_UDP_MOB);
 	}
 	
 	public void run(){
@@ -77,25 +76,50 @@ public class ExchangeFrame extends Thread{
             	byte[] buf = new byte[64000];
                 DatagramPacket receivedPacket = new DatagramPacket(buf, buf.length);
                 //udpSocket_sys.setSoTimeout(2000);
-                System.out.println("...Frame receiving from system... ");
+                //System.out.println("...Frame receiving from system... ");
                 dsSys.receive(receivedPacket);
                 System.out.println("...Frame received from system... ");
+                
                 new Thread(new Runnable() {
 					
 					@Override
 					public void run() {
 						//InetAddress mobAddress = ((InetSocketAddress) sockMob.getRemoteSocketAddress()).getAddress();
-						InetAddress mobAddress = Main.sysIP2mobIP.get(receivedPacket.getAddress());
+						/*InetAddress mobAddress = Main.sysIP2mobIP.get(receivedPacket.getAddress());
 						System.out.println("Mob address......."+mobAddress);
 						int remoteUDPPort = sysIP2MobUdpPortMap.get(receivedPacket.getAddress());
-	                    
-	                    receivedPacket.setAddress(mobAddress);
-	                    receivedPacket.setPort(remoteUDPPort);
-	                    try {
-							dsMob.send(receivedPacket);
-						} catch (IOException e) {
-							e.printStackTrace();
-					
+						receivedPacket.setAddress(mobAddress);
+	                    receivedPacket.setPort(remoteUDPPort);*/
+						InetSocketAddress sysUDP = (InetSocketAddress) receivedPacket.getSocketAddress();
+						System.out.println("EXCHANGE FRAME LENGTH: " + receivedPacket.getLength());
+						if(receivedPacket.getLength()<100 && !Main.sysUDP2hashIDMap.containsKey(sysUDP)){
+							String hashId = new String(receivedPacket.getData()).trim();
+							Main.sysUDP2hashIDMap.put(sysUDP,hashId);
+							System.out.println("EF THREAD SYS2HASHID ENTRY DONE............ next bool = "+Main.sysUDP2mobUDPPortMap.containsKey(sysUDP));
+		                }else if(Main.sysUDP2hashIDMap.containsKey(sysUDP)&& !Main.sysUDP2mobUDPPortMap.containsKey(sysUDP)){
+		                	String hashId = Main.sysUDP2hashIDMap.get(sysUDP);
+		                	System.out.println("EXCHANGE FRAME hashID2MobUDPMap = "+Main.hashID2MobUDPMap.containsKey(hashId));
+		                	if(Main.hashID2MobUDPMap.containsKey(hashId)){
+			                	InetSocketAddress mobUDP = Main.hashID2MobUDPMap.get(hashId);
+			                	System.out.println("Exchange Frame Hash ID: " + hashId + " MobUdpIp: " + mobUDP + "SysUdpIp: " + sysUDP);
+			                	Main.sysUDP2mobUDPPortMap.put(sysUDP,mobUDP);
+			                	Main.mobUDP2sysUDPPortMap.put(mobUDP, sysUDP);
+			                	System.out.println("EXCHANGE FRAME SYS2MOB ENTRY DONE.......... ");
+		                	}
+		                }else if(receivedPacket.getLength()>100 && Main.sysUDP2mobUDPPortMap.containsKey(sysUDP)){
+		                	sysUDP = (InetSocketAddress) receivedPacket.getSocketAddress();
+							InetSocketAddress mobAddress = Main.sysUDP2mobUDPPortMap.get(sysUDP);
+							System.out.println("MOB UDP ADDRESS SET: " + mobAddress);
+		                    receivedPacket.setAddress(mobAddress.getAddress());
+		                    receivedPacket.setPort(mobAddress.getPort());
+		                    
+		                    try {
+		                    	System.out.println("dsMob: " + MobUDPPacketRx.dsMob + " dsSys: " + dsSys);
+		                    	MobUDPPacketRx.dsMob.send(receivedPacket);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							
 						}
 	                    
 	                    //System.out.println("...Frame forwarded to android..." + "port = " + remoteUDPPort);

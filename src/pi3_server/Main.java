@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -50,6 +52,10 @@ public class Main {
 	public static ConcurrentHashMap<InetAddress, InetAddress> mobIP2sysIP = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress, InetAddress> sysIP2mobIP = new ConcurrentHashMap<InetAddress, InetAddress>();
 	public static ConcurrentHashMap<String, ConnectSysThread> connSysThreadsMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<String,InetSocketAddress> hashID2MobUDPMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetSocketAddress,String> sysUDP2hashIDMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetSocketAddress, InetSocketAddress> sysUDP2mobUDPPortMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetSocketAddress, InetSocketAddress> mobUDP2sysUDPPortMap = new ConcurrentHashMap<>();
 	
 	//public static ConcurrentHashMap<String, String> hashID2emailID = new ConcurrentHashMap<>();
 	//public static ConcurrentHashMap<String, InetAddress> hashID2sysIPMap= new ConcurrentHashMap<>();
@@ -98,6 +104,14 @@ public class Main {
 				
 			}
 		}).start();
+		
+		try {
+			MobUDPPacketRx mobUDPPacketRx = new MobUDPPacketRx();
+			mobUDPPacketRx.start();
+		} catch (SocketException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
+		}
 		
 		try {
 			ServerSockThread servSockMsgSysThread = new ServerSockThread(PORT_MESSAGE_SYS);
