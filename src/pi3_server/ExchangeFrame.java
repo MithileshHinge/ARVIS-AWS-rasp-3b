@@ -90,15 +90,15 @@ public class ExchangeFrame extends Thread{
 						int remoteUDPPort = sysIP2MobUdpPortMap.get(receivedPacket.getAddress());
 						receivedPacket.setAddress(mobAddress);
 	                    receivedPacket.setPort(remoteUDPPort);*/
-						InetSocketAddress sysUDP = (InetSocketAddress) receivedPacket.getSocketAddress();
-						System.out.println("EXCHANGE FRAME LENGTH: " + receivedPacket.getLength());
-						if(receivedPacket.getLength()<100 && !Main.sysUDP2hashIDMap.containsKey(sysUDP)){
+						InetAddress sysUDP = (InetAddress) receivedPacket.getAddress();
+						System.out.println("EXCHANGE FRAME LENGTH: " + receivedPacket.getLength() + "	" + sysUDP);
+						if(receivedPacket.getLength()<100 && !Main.sysUDPIP2hashIDMap.containsKey(sysUDP)){
 							String hashId = new String(receivedPacket.getData()).trim();
-							Main.sysUDP2hashIDMap.put(sysUDP,hashId);
+							Main.sysUDPIP2hashIDMap.put(sysUDP,hashId);
 							System.out.println("EF THREAD SYS2HASHID ENTRY DONE............ next bool = "+Main.sysUDP2mobUDPPortMap.containsKey(sysUDP));
-		                }else if(Main.sysUDP2hashIDMap.containsKey(sysUDP)&& !Main.sysUDP2mobUDPPortMap.containsKey(sysUDP)){
-		                	String hashId = Main.sysUDP2hashIDMap.get(sysUDP);
-		                	System.out.println("EXCHANGE FRAME hashID2MobUDPMap = "+Main.hashID2MobUDPMap.containsKey(hashId));
+		                }else if(Main.sysUDPIP2hashIDMap.containsKey(sysUDP) && !Main.sysUDP2mobUDPPortMap.containsKey(sysUDP)){
+		                	String hashId = Main.sysUDPIP2hashIDMap.get(sysUDP);
+		                	System.out.println("EF THREAD hashID2MobUDPMap = "+Main.hashID2MobUDPMap.containsKey(hashId));
 		                	if(Main.hashID2MobUDPMap.containsKey(hashId)){
 			                	InetSocketAddress mobUDP = Main.hashID2MobUDPMap.get(hashId);
 			                	System.out.println("Exchange Frame Hash ID: " + hashId + " MobUdpIp: " + mobUDP + "SysUdpIp: " + sysUDP);
@@ -107,20 +107,21 @@ public class ExchangeFrame extends Thread{
 			                	System.out.println("EXCHANGE FRAME SYS2MOB ENTRY DONE.......... ");
 		                	}
 		                }else if(receivedPacket.getLength()>100 && Main.sysUDP2mobUDPPortMap.containsKey(sysUDP)){
-		                	sysUDP = (InetSocketAddress) receivedPacket.getSocketAddress();
+		                	sysUDP = (InetAddress) receivedPacket.getAddress();
 							InetSocketAddress mobAddress = Main.sysUDP2mobUDPPortMap.get(sysUDP);
 							System.out.println("MOB UDP ADDRESS SET: " + mobAddress);
 		                    receivedPacket.setAddress(mobAddress.getAddress());
 		                    receivedPacket.setPort(mobAddress.getPort());
 		                    
 		                    try {
-		                    	System.out.println("dsMob: " + MobUDPPacketRx.dsMob + " dsSys: " + dsSys);
+		                    	//System.out.println("dsMob: " + MobUDPPacketRx.dsMob + " dsSys: " + dsSys);
 		                    	MobUDPPacketRx.dsMob.send(receivedPacket);
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
 							
-						}
+						}else
+							System.out.println("EF THREAD : fakta System.out.println");
 	                    
 	                    //System.out.println("...Frame forwarded to android..." + "port = " + remoteUDPPort);
 					}

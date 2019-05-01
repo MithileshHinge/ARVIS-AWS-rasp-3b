@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Date;
@@ -23,13 +24,14 @@ class ConnectMobThread extends Thread{
 	
 	public void run(){
 		InputStream inMob;
+		String hashID = null;
 		try {
 			inMob = connMobSock.getInputStream();
 			DataInputStream dInMob = new DataInputStream(inMob);
 			OutputStream outMob = connMobSock.getOutputStream();
 			DataOutputStream dOutMob = new DataOutputStream(outMob);
 			
-			String hashID = dInMob.readUTF();
+			hashID = dInMob.readUTF();
 			Date date = new Date();
 			System.out.println(Main.ft.format(date)+"	hash id from mob = "+hashID);
 			if (Main.db.checkRegistered(hashID)){
@@ -172,6 +174,19 @@ class ConnectMobThread extends Thread{
 				//ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP);
 				ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(mobIP);
 			}	
+			if(hashID != null){
+				InetSocketAddress mobUDPIP = Main.hashID2MobUDPMap.get(hashID);
+				Main.hashID2MobUDPMap.remove(hashID);
+				if(mobUDPIP != null){
+					InetAddress sysUDPIP = Main.mobUDP2sysUDPPortMap.get(mobUDPIP);
+					Main.mobUDP2sysUDPPortMap.remove(mobUDPIP);
+					if(sysUDPIP != null){
+						Main.sysUDP2mobUDPPortMap.remove(sysUDPIP);
+						Main.sysUDPIP2hashIDMap.remove(sysUDPIP);
+					}
+					
+				}
+			}
 			Main.mobIP2sysIP.remove(mobIP);
 		}
 		try {

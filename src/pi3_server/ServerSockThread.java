@@ -124,11 +124,11 @@ public class ServerSockThread extends Thread {
 									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
 									sysLivefeedSock.close();
 									InetSocketAddress mobUDPIP = Main.hashID2MobUDPMap.get(hashID);
-									InetSocketAddress sysUDPIP = Main.mobUDP2sysUDPPortMap.get(mobUDPIP);
+									InetAddress sysUDPIP = Main.mobUDP2sysUDPPortMap.get(mobUDPIP);
 									Main.hashID2MobUDPMap.remove(hashID);
 									Main.mobUDP2sysUDPPortMap.remove(mobUDPIP);
 									Main.sysUDP2mobUDPPortMap.remove(sysUDPIP);
-									Main.sysUDP2hashIDMap.remove(sysUDPIP);
+									Main.sysUDPIP2hashIDMap.remove(sysUDPIP);
 									System.out.println("UDP IPs removed");
 									
 									
