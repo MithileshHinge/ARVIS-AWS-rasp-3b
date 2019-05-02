@@ -18,8 +18,8 @@ public class ExchangeAudio extends Thread{
 	//Socket socket_system,socket_mob;
 	//OutputStream out_sys,out_mob;
 	//InputStream in_sys,in_mob;
-	DatagramSocket dataSocket_system, dataSocket_mob;
-	public static ConcurrentHashMap<InetAddress, Integer> mobIP2SysAudioUdpPortMap = new ConcurrentHashMap<>();
+	DatagramSocket dataSocket_mob;
+	//public static ConcurrentHashMap<InetAddress, Integer> mobIP2SysAudioUdpPortMap = new ConcurrentHashMap<>();
 	
 	//public ExchangeAudio(InetAddress sysIP, InetAddress mobIP) throws IOException{
 	public ExchangeAudio() throws IOException{
@@ -35,7 +35,7 @@ public class ExchangeAudio extends Thread{
         dataSocket_mob = new DatagramSocket(Main.PORT_AUDIO_UDP_MOB);
         //dataSocket_mob.setSoTimeout(500);
         
-        dataSocket_system = new DatagramSocket(Main.PORT_AUDIO_UDP_SYS);
+        
 	}
 	
 	public void run(){
@@ -82,29 +82,35 @@ public class ExchangeAudio extends Thread{
 	            try{
 					//out_mob.write(1);
             		//out_mob.flush();
-	            	System.out.println("...Audio receiving from mob... ");
-		            dataSocket_mob.receive(receivePacket);
+	            	dataSocket_mob.receive(receivePacket);
 		            System.out.println("...Audio received from mob... ");
 		            new Thread(new Runnable(){
 		            	@Override
 		            	public void run() {
-		            		System.out.println("In ExchangeAudio MobIP : " + receivePacket.getAddress());
-		            		int remoteUDPPort =  mobIP2SysAudioUdpPortMap.get(receivePacket.getAddress());
-		            		InetAddress destination = Main.mobIP2sysIP.get(receivePacket.getAddress());
-		            		System.out.println("In ExchangeAudio SysIP : " + destination);
-				            receivePacket.setAddress(destination);
+		            		/*int remoteUDPPort =  mobIP2SysAudioUdpPortMap.get(receivePacket.getAddress());
+		            		InetAddress destination = Main.mobIP2sysIP.get(receivePacket.getAddress());*/
+		            		 
+		            		InetAddress mobIP = receivePacket.getAddress();
+		            		System.out.println("In ExchangeAudio MobIP : " + mobIP + " " + Main.mobUDPIP2sysUDPPortMap.containsKey(mobIP));
+		            		if(Main.mobUDPIP2sysUDPPortMap.containsKey(mobIP)){
+		            			InetAddress destination = Main.mobUDPIP2sysUDPPortMap.get(mobIP).getAddress();
+		            			int remoteUDPPort = Main.mobUDPIP2sysUDPPortMap.get(mobIP).getPort();
+		            			receivePacket.setAddress(destination);
+		            			receivePacket.setPort(remoteUDPPort);
+		            			System.out.println("SYS UDP IP: " + destination + " SYS UDP PORT: " + remoteUDPPort);
+		            			try {
+					            	// check if mobUDPIP2sysUDPPortMap has the respective entry
+									SysUDPPacketRx.dataSocket_system.send(receivePacket);
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+		            		}
+		            		//System.out.println("In ExchangeAudio SysIP : " + destination);
 				            //receivePacket.setPort(Main.PORT_AUDIO_UDP_SYS);
+				            //System.out.println("Remote Port : " + remoteUDPPort);
 				            
-				            receivePacket.setPort(remoteUDPPort);
 				            
-				            System.out.println("Remote Port : " + remoteUDPPort);
-				            
-				            try {
-								dataSocket_system.send(receivePacket);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-				            System.out.println(".....audio packet sent...................................port = "+remoteUDPPort);
+				            //System.out.println(".....audio packet sent...................................port = "+remoteUDPPort);
 		            	}
 		            }).start();
 	            }catch (SocketTimeoutException s) {

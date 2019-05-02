@@ -56,6 +56,7 @@ public class Main {
 	public static ConcurrentHashMap<InetAddress,String> sysUDPIP2hashIDMap = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress, InetSocketAddress> sysUDP2mobUDPPortMap = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetSocketAddress, InetAddress> mobUDP2sysUDPPortMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetAddress, InetSocketAddress> mobUDPIP2sysUDPPortMap = new ConcurrentHashMap<>();
 	
 	//public static ConcurrentHashMap<String, String> hashID2emailID = new ConcurrentHashMap<>();
 	//public static ConcurrentHashMap<String, InetAddress> hashID2sysIPMap= new ConcurrentHashMap<>();
@@ -108,6 +109,8 @@ public class Main {
 		try {
 			MobUDPPacketRx mobUDPPacketRx = new MobUDPPacketRx();
 			mobUDPPacketRx.start();
+			SysUDPPacketRx sysUDPPacketRx = new SysUDPPacketRx();
+			sysUDPPacketRx.start();
 		} catch (SocketException e3) {
 			// TODO Auto-generated catch block
 			e3.printStackTrace();

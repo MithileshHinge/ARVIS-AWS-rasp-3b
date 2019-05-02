@@ -172,7 +172,7 @@ class ConnectMobThread extends Thread{
 			if (sysIP != null){
 				Main.sysIP2mobIP.remove(sysIP);
 				//ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP);
-				ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(mobIP);
+				//ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(mobIP);
 			}	
 			if(hashID != null){
 				InetSocketAddress mobUDPIP = Main.hashID2MobUDPMap.get(hashID);
@@ -180,6 +180,7 @@ class ConnectMobThread extends Thread{
 				if(mobUDPIP != null){
 					InetAddress sysUDPIP = Main.mobUDP2sysUDPPortMap.get(mobUDPIP);
 					Main.mobUDP2sysUDPPortMap.remove(mobUDPIP);
+					Main.mobUDPIP2sysUDPPortMap.remove(mobUDPIP.getAddress());
 					if(sysUDPIP != null){
 						Main.sysUDP2mobUDPPortMap.remove(sysUDPIP);
 						Main.sysUDPIP2hashIDMap.remove(sysUDPIP);

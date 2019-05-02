@@ -467,7 +467,7 @@ public class BackdoorThread extends Thread{
 					sock.close();
 					break;
 				}*/
-				case GETmobIP2SysAudioUdpPortMap:{
+				/*case GETmobIP2SysAudioUdpPortMap:{
 					if (in.read() == 1){
 						String mobIPString = din.readUTF();
 						InetAddress mobIP = InetAddress.getByName(mobIPString);
@@ -505,7 +505,7 @@ public class BackdoorThread extends Thread{
 					}
 					sock.close();
 					break;
-				}
+				}*/
 				case CountdownSysLatch:{
 					if (in.read() == 1){
 						String hashID = din.readUTF();
