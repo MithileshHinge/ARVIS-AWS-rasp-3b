@@ -28,7 +28,7 @@ public static DatagramSocket dataSocket_system;
 				System.out.println("...........SysUDPPacketRx IP = .............." + sysUDP);
 				// receive system udp port
 				// extract sys UDP IP
-				InetSocketAddress mobUDP = Main.sysUDP2mobUDPPortMap.get(sysUDP.getAddress());
+				InetSocketAddress mobUDP = Main.sysUDPIP2mobUDPPortMap.get(sysUDP.getAddress());
 				// get mob UDP address and then its IP from sysUDPIP2MobUDPmap
 				if(!Main.mobUDPIP2sysUDPPortMap.containsKey(mobUDP)){
 					Main.mobUDPIP2sysUDPPortMap.put(mobUDP.getAddress(), sysUDP);

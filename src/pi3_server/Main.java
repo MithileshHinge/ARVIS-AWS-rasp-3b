@@ -33,10 +33,15 @@ public class Main {
 			PORT_AUDIO_TCP_MOB=7670,
 			PORT_AUDIO_UDP_SYS=6671,
 			PORT_AUDIO_UDP_MOB=7671,
+			PORT_LISTEN_TCP_SYS=6675,
+			PORT_LISTEN_TCP_MOB=7675,
+			PORT_LISTEN_UDP_SYS=6673,
+			PORT_LISTEN_UDP_MOB=7673,
 			PORT_PERSON_DETECT_SYS=6672,
 			PORT_PERSON_DETECT_GPU=5672,
 			PORT_PERSON_DETECT_GPU2=5673,
 			PORT_BACKDOOR=5555;
+			
 
 	public static final byte 
 			BYTE_FACEFOUND_VDOGENERATING = 1, 
@@ -54,9 +59,10 @@ public class Main {
 	public static ConcurrentHashMap<String, ConnectSysThread> connSysThreadsMap = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<String,InetSocketAddress> hashID2MobUDPMap = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress,String> sysUDPIP2hashIDMap = new ConcurrentHashMap<>();
-	public static ConcurrentHashMap<InetAddress, InetSocketAddress> sysUDP2mobUDPPortMap = new ConcurrentHashMap<>();
-	public static ConcurrentHashMap<InetSocketAddress, InetAddress> mobUDP2sysUDPPortMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetAddress, InetSocketAddress> sysUDPIP2mobUDPPortMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetAddress, InetAddress> mobUDPIP2sysUDPIPPortMap = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress, InetSocketAddress> mobUDPIP2sysUDPPortMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetAddress, InetSocketAddress> sysUDPIP2mobUDPListenPortMap = new ConcurrentHashMap<>();
 	
 	//public static ConcurrentHashMap<String, String> hashID2emailID = new ConcurrentHashMap<>();
 	//public static ConcurrentHashMap<String, InetAddress> hashID2sysIPMap= new ConcurrentHashMap<>();
@@ -111,6 +117,8 @@ public class Main {
 			mobUDPPacketRx.start();
 			SysUDPPacketRx sysUDPPacketRx = new SysUDPPacketRx();
 			sysUDPPacketRx.start();
+			MobUDPListenRx mobUDPListenRx = new MobUDPListenRx();
+			mobUDPListenRx.start();
 		} catch (SocketException e3) {
 			// TODO Auto-generated catch block
 			e3.printStackTrace();
@@ -127,6 +135,8 @@ public class Main {
 			ServerSockThread servSockDetectPersonGPUThread = new ServerSockThread(PORT_PERSON_DETECT_GPU);
 			ServerSockThread servSockVideoSysThread = new ServerSockThread(PORT_NOTIF_VIDEO_SYS);
 			ServerSockThread servSockVideoMobThread = new ServerSockThread(PORT_NOTIF_VIDEO_MOB);
+			ServerSockThread servSockListenSysThread = new ServerSockThread(PORT_LISTEN_TCP_SYS);
+			ServerSockThread servSockListenMobThread = new ServerSockThread(PORT_LISTEN_TCP_MOB);
 
 			servSockMsgSysThread.start();
 			servSockMsgMobThread.start();
@@ -138,6 +148,8 @@ public class Main {
 			servSockDetectPersonGPUThread.start();
 			servSockVideoSysThread.start();
 			servSockVideoMobThread.start();
+			servSockListenSysThread.start();
+			servSockListenMobThread.start();
 			
 		} catch (IOException e2) {
 			e2.printStackTrace();

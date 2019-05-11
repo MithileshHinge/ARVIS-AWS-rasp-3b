@@ -20,6 +20,7 @@ public class MessageThread extends Thread {
 			BYTE_PLAY_ALARM=7, 
 			BYTE_STOP_ALARM=8, 
 			BYTE_START_LIVEFEED=2,
+			BYTE_START_LISTEN=5,
 			//BYTE_STOP_LIVEFEED=4,
 			BYTE_START_VIDEO_DOWNLOAD = 14;
 			
@@ -74,6 +75,10 @@ public class MessageThread extends Thread {
 					}
 					*/
 					break;
+					
+				case BYTE_START_LISTEN:
+					System.out.println("@@@@@@@@@@@@@@@@@Listen on kela..........................");
+					break;
 				/*case BYTE_START_LISTEN:
 					System.out.println("@@@@@@@@@@@@@@@@@Listen on kela.............................");
 					SendingFrame.listen = true;
@@ -96,7 +101,7 @@ public class MessageThread extends Thread {
 				
 				sockSys.getOutputStream().write(msg);
 				sockSys.getOutputStream().flush();
-				System.out.println("............................msg thread - byte sent to sys.................");
+				System.out.println("............................msg thread - byte sent to sys................."+msg);
 				
 				int ptemp = sockSys.getInputStream().read(); //TODO: Error handling can be implemented here (different bytes received for different errors/response, e.g. 1=SUCCESS)
 				System.out.println("............................msg thread - ack received from sys................." + ptemp);

@@ -22,6 +22,7 @@ public class ServerSockThread extends Thread {
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2MessageSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	//public static ConcurrentHashMap<InetAddress, Socket> mobIP2MessageSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2LivefeedSockMap = new ConcurrentHashMap<InetAddress, Socket>();
+	public static ConcurrentHashMap<InetAddress, Socket> sysIP2ListenSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	//public static ConcurrentHashMap<InetAddress, Socket> mobIP2LivefeedSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2AudioSockMap = new ConcurrentHashMap<InetAddress, Socket>();
 	public static ConcurrentHashMap<InetAddress, Socket> sysIP2VideoSockMap = new ConcurrentHashMap<InetAddress, Socket>();
@@ -123,13 +124,14 @@ public class ServerSockThread extends Thread {
 									//ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
 									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
 									sysLivefeedSock.close();
-									InetSocketAddress mobUDPIP = Main.hashID2MobUDPMap.get(hashID);
-									InetAddress sysUDPIP = Main.mobUDP2sysUDPPortMap.get(mobUDPIP);
+									InetSocketAddress mobUDP = Main.hashID2MobUDPMap.get(hashID);
+									InetAddress sysUDPIP = Main.mobUDPIP2sysUDPIPPortMap.get(mobUDP.getAddress());
 									Main.hashID2MobUDPMap.remove(hashID);
-									Main.mobUDP2sysUDPPortMap.remove(mobUDPIP);
-									Main.sysUDP2mobUDPPortMap.remove(sysUDPIP);
+									Main.mobUDPIP2sysUDPIPPortMap.remove(mobUDP.getAddress());
+									Main.sysUDPIP2mobUDPPortMap.remove(sysUDPIP);
 									Main.sysUDPIP2hashIDMap.remove(sysUDPIP);
-									Main.mobUDPIP2sysUDPPortMap.remove(mobUDPIP.getAddress());
+									Main.mobUDPIP2sysUDPPortMap.remove(mobUDP.getAddress());
+									Main.sysUDPIP2mobUDPListenPortMap.remove(sysUDPIP);
 									System.out.println("UDP IPs removed");
 									
 									
@@ -210,6 +212,72 @@ public class ServerSockThread extends Thread {
 								
 								
 								break;
+								
+							case Main.PORT_LISTEN_TCP_SYS:
+								sysIP2ListenSockMap.put(sock.getInetAddress(), sock);
+								break;
+							case Main.PORT_LISTEN_TCP_MOB:
+								//mobIP2LivefeedSockMap.put(sock.getInetAddress(), sock);
+									
+								try {
+									InputStream sockIn = sock.getInputStream();
+									DataInputStream din = new DataInputStream(sockIn);
+									
+									String hashID = din.readUTF();
+									
+									InetAddress mobIP = sock.getInetAddress();
+									InetAddress sysIP2 = Main.mobIP2sysIP.get(mobIP);
+									if (sysIP2 == null){
+										System.out.println("Mobile with this IP has never initiated ConnectMob method OR Corresponding System is offline");
+										
+										sock.getOutputStream().write(0);
+										sock.getOutputStream().flush();
+										try {
+											sock.close();
+										} catch (IOException e) {
+											e.printStackTrace();
+										}
+										return;
+									}else {
+										//sysIP2 = Main.connSysThreadsMap.get(hashID).connSysSock.getInetAddress();
+										sock.getOutputStream().write(1);
+										sock.getOutputStream().flush();
+									}
+									
+									//ExchangeFrame.sysIP2MobUdpPortMap.put(sysIP2, udpPort);
+
+									while(true){
+										try{
+											int p = sock.getInputStream().read();
+											if (p == -1) break;
+											sock.getOutputStream().write(1);
+											sock.getOutputStream().flush();
+											
+											try {
+												Thread.sleep(2000);
+											} catch (InterruptedException e) {
+												e.printStackTrace();
+											}
+											
+										} catch (IOException e1) {
+											e1.printStackTrace();
+											break;
+										}
+									}
+									
+									System.out.println("Listen stopped!!!");
+									Socket sysListenSock = sysIP2ListenSockMap.get(sysIP2);
+									sysListenSock.close();
+									InetSocketAddress modUDP = Main.hashID2MobUDPMap.get(hashID);
+									InetAddress sysUDPIP = Main.mobUDPIP2sysUDPIPPortMap.get(modUDP.getAddress());
+									Main.sysUDPIP2mobUDPListenPortMap.remove(sysUDPIP);
+									System.out.println("UDP IPs removed from LISTEN");
+				
+								} catch (IOException e1) {
+									e1.printStackTrace();
+								}
+								break;
+								
 							case Main.PORT_NOTIF_VIDEO_SYS:
 								sysIP2VideoSockMap.put(sock.getInetAddress(), sock);
 								System.out.println("Concurrent hash map VideoSockMap");
