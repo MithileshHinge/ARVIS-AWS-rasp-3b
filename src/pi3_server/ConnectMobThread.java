@@ -145,15 +145,23 @@ class ConnectMobThread extends Thread{
 			dOutMob.flush();
 			
 			connMobSock.setSoTimeout(12000);
+			int i = 0;
 			while(true){
-				outMob.write(1);
-				outMob.flush();
-				int p = inMob.read();
-				if (p == -1) break;
 				try {
+					outMob.write(1);
+					outMob.flush();
+					int p = inMob.read();
+					if (p == -1) break;
 					Thread.sleep(10000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
+				} catch (SocketTimeoutException s){
+					s.printStackTrace();
+				} catch (IOException f){
+					f.printStackTrace();
+					i++;
+					System.out.println("Connect Mob thread disconnect " + i);
+					if(i == 3)	break;
 				}
 			}
 			
@@ -186,7 +194,6 @@ class ConnectMobThread extends Thread{
 						Main.sysUDPIP2hashIDMap.remove(sysUDPIP);
 						Main.sysUDPIP2mobUDPListenPortMap.remove(sysUDPIP);
 					}
-					
 				}
 			}
 			Main.mobIP2sysIP.remove(mobIP);

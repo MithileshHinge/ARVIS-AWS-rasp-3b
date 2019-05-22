@@ -19,14 +19,15 @@ public class MobUDPPacketRx extends Thread{
 	
 	public void run(){
 		System.out.println("MOBUDPPacketRX STARTED...................");
+		String hashID = null;
 		while(true){
 			byte[] buf = new byte[64];
             DatagramPacket receivedPacket = new DatagramPacket(buf, buf.length);
             //udpSocket_sys.setSoTimeout(2000);
-            System.out.println("...MOB UDP HOLE PUNCHING... ");
+            //System.out.println("...MOB UDP HOLE PUNCHING... " + hashID);
             try {
 				dsMob.receive(receivedPacket);
-				String hashID = new String(receivedPacket.getData()).trim();
+				hashID = new String(receivedPacket.getData()).trim();
 				InetSocketAddress mobUDP = (InetSocketAddress) receivedPacket.getSocketAddress();
 				if(!Main.hashID2MobUDPMap.containsKey(hashID)){
 					Main.hashID2MobUDPMap.put(hashID, mobUDP);

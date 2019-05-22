@@ -115,6 +115,14 @@ public class MessageThread extends Thread {
 				
 			} catch (IOException e) {
 				e.printStackTrace();
+				try {
+					sockMob.getOutputStream().write(0);
+					sockMob.getOutputStream().flush();
+					System.out.println("............................msg thread - ack sent to mob....................");
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 	}
 }

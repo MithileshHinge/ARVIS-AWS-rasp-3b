@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeoutException;
 
 public class ConnectSysThread extends Thread{
 	public Socket connSysSock;
@@ -58,15 +59,23 @@ public class ConnectSysThread extends Thread{
 					System.out.println("....System local IP = "+sysLocalIP);
 					// Check if connection is alive every 10 seconds
 					connSysSock.setSoTimeout(12000);
+					int i = 0;
 					while(true){
-						outSys.write(1);
-						outSys.flush();
-						int p = inSys.read();
-						if (p == -1) break;
 						try {
+							outSys.write(1);
+							outSys.flush();
+							int p = inSys.read();
+							if (p == -1) break;
 							Thread.sleep(10000);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
+						} catch (SocketTimeoutException s){
+							s.printStackTrace();
+						} catch (IOException f){
+							f.printStackTrace();
+							i++;
+							System.out.println("Connect Sys thread disconnect " + i);
+							if(i == 3)	break;
 						}
 					}
 					
@@ -101,15 +110,23 @@ public class ConnectSysThread extends Thread{
 				
 				// Check if connection is alive every 10 seconds
 				connSysSock.setSoTimeout(12000);
+				int i = 0;
 				while(true){
-					outSys.write(1);
-					outSys.flush();
-					int p = inSys.read();
-					if (p == -1) break;
 					try{
+						outSys.write(1);
+						outSys.flush();
+						int p = inSys.read();
+						if (p == -1) break;
 						Thread.sleep(10000);
 					}catch (InterruptedException e){
 						e.printStackTrace();
+					}catch (SocketTimeoutException s){
+						s.printStackTrace();
+					} catch (IOException f){
+						f.printStackTrace();
+						i++;
+						System.out.println("Connect Sys thread disconnect " + i);
+						if(i == 3)	break;
 					}
 				}
 			}
