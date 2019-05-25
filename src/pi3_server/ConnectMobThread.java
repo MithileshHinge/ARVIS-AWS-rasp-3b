@@ -183,7 +183,16 @@ class ConnectMobThread extends Thread{
 				//ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(mobIP);
 			}	
 			if(hashID != null){
-				InetSocketAddress mobUDP = Main.hashID2MobUDPMap.get(hashID);
+				InetSocketAddress sysUDP = Main.hashID2SysUDPPortMap.get(hashID);
+				Main.hashID2SysUDPPortMap.remove(hashID);
+				
+				if(sysUDP != null){
+					InetAddress mobUDPIP = Main.sysUDPIP2mobUDPIPMap.get(sysUDP.getAddress());
+					Main.mobUDPIP2hashIDMap.remove(mobUDPIP);
+					Main.mobUDPIP2sysUDPPortMap.remove(mobUDPIP);
+					Main.sysUDPIP2mobUDPIPMap.remove(sysUDP.getAddress());
+				}
+				/*InetSocketAddress mobUDP = Main.hashID2MobUDPMap.get(hashID);
 				Main.hashID2MobUDPMap.remove(hashID);
 				if(mobUDP != null){
 					InetAddress sysUDPIP = Main.mobUDPIP2sysUDPIPPortMap.get(mobUDP.getAddress());
@@ -194,7 +203,7 @@ class ConnectMobThread extends Thread{
 						Main.sysUDPIP2hashIDMap.remove(sysUDPIP);
 						Main.sysUDPIP2mobUDPListenPortMap.remove(sysUDPIP);
 					}
-				}
+				}*/
 			}
 			Main.mobIP2sysIP.remove(mobIP);
 		}

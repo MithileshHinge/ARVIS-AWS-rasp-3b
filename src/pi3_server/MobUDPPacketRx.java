@@ -14,7 +14,7 @@ public class MobUDPPacketRx extends Thread{
 	
 	
 	public MobUDPPacketRx() throws SocketException{
-		dsMob = new DatagramSocket(Main.PORT_LIVEFEED_UDP_MOB);
+		dsMob = new DatagramSocket(Main.PORT_AUDIO_UDP_MOB);
 	}
 	
 	public void run(){
@@ -29,10 +29,10 @@ public class MobUDPPacketRx extends Thread{
 				dsMob.receive(receivedPacket);
 				hashID = new String(receivedPacket.getData()).trim();
 				InetSocketAddress mobUDP = (InetSocketAddress) receivedPacket.getSocketAddress();
-				if(!Main.hashID2MobUDPMap.containsKey(hashID)){
+				/*if(!Main.hashID2MobUDPMap.containsKey(hashID)){
 					Main.hashID2MobUDPMap.put(hashID, mobUDP);
 					System.out.println("...........hashID2MobUDPMap entry done..............");
-				}	
+				}*/	
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

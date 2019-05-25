@@ -51,7 +51,7 @@ public class Main {
 			BYTE_ABRUPT_END = 5, 
 			BYTE_LIGHT_CHANGE = 6;
 
-	public static ExchangeFrame exchangeFrame;
+	public static ExchangeAudio exchangeAudio;
 	//public static ConcurrentHashMap<String, MergeThread> mergeThreadsMap = new ConcurrentHashMap<>();
 	//public static ConcurrentHashMap<InetAddress, Socket> mobIP2connMobSock = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress, InetAddress> mobIP2sysIP = new ConcurrentHashMap<>();
@@ -60,9 +60,13 @@ public class Main {
 	public static ConcurrentHashMap<String,InetSocketAddress> hashID2MobUDPMap = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress,String> sysUDPIP2hashIDMap = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress, InetSocketAddress> sysUDPIP2mobUDPPortMap = new ConcurrentHashMap<>();
-	public static ConcurrentHashMap<InetAddress, InetAddress> mobUDPIP2sysUDPIPPortMap = new ConcurrentHashMap<>();
-	public static ConcurrentHashMap<InetAddress, InetSocketAddress> mobUDPIP2sysUDPPortMap = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress, InetSocketAddress> sysUDPIP2mobUDPListenPortMap = new ConcurrentHashMap<>();
+	
+	//Sending Audio Port Maps
+	public static ConcurrentHashMap<InetAddress, String> mobUDPIP2hashIDMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<String, InetSocketAddress> hashID2SysUDPPortMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetAddress, InetSocketAddress> mobUDPIP2sysUDPPortMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetAddress, InetAddress> sysUDPIP2mobUDPIPMap = new ConcurrentHashMap<>();
 	
 	//public static ConcurrentHashMap<String, String> hashID2emailID = new ConcurrentHashMap<>();
 	//public static ConcurrentHashMap<String, InetAddress> hashID2sysIPMap= new ConcurrentHashMap<>();
@@ -113,8 +117,8 @@ public class Main {
 		}).start();
 		
 		try {
-			MobUDPPacketRx mobUDPPacketRx = new MobUDPPacketRx();
-			mobUDPPacketRx.start();
+			/*MobUDPPacketRx mobUDPPacketRx = new MobUDPPacketRx();
+			mobUDPPacketRx.start();*/
 			SysUDPPacketRx sysUDPPacketRx = new SysUDPPacketRx();
 			sysUDPPacketRx.start();
 			MobUDPListenRx mobUDPListenRx = new MobUDPListenRx();
@@ -160,12 +164,12 @@ public class Main {
 		
 		
 		try {
-			exchangeFrame = new ExchangeFrame();
+			exchangeAudio = new ExchangeAudio();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 			return;
 		}
-		exchangeFrame.start();
+		exchangeAudio.start();
 		
 		while(true){
 			

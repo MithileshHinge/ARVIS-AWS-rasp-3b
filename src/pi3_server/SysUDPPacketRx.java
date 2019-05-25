@@ -20,23 +20,17 @@ public static DatagramSocket dataSocket_system;
 		while(true){
 			byte[] buf = new byte[64];
             DatagramPacket receivedPacket = new DatagramPacket(buf, buf.length);
-            //udpSocket_sys.setSoTimeout(2000);
-            System.out.println("...SYS UDP HOLE PUNCHING... ");
+            //System.out.println("...SYS UDP HOLE PUNCHING... ");
             try {
 				dataSocket_system.receive(receivedPacket);
 				InetSocketAddress sysUDP = (InetSocketAddress) receivedPacket.getSocketAddress();
-				System.out.println("...........SysUDPPacketRx IP = .............." + sysUDP);
-				// receive system udp port
-				// extract sys UDP IP
-				InetSocketAddress mobUDP = Main.sysUDPIP2mobUDPPortMap.get(sysUDP.getAddress());
-				// get mob UDP address and then its IP from sysUDPIP2MobUDPmap
-				if(!Main.mobUDPIP2sysUDPPortMap.containsKey(mobUDP)){
-					Main.mobUDPIP2sysUDPPortMap.put(mobUDP.getAddress(), sysUDP);
-					System.out.println("...........mobIP2AudioUDPMap entry done..............");
+				String hashID = new String(receivedPacket.getData()).trim();
+				//System.out.println("...........SysUDPPacketRx IP = .............." + sysUDP);
+				if(!Main.hashID2SysUDPPortMap.containsKey(hashID)){
+					Main.hashID2SysUDPPortMap.put(hashID,sysUDP);
+					System.out.println("...hashID 2 SysUDP FILLED... ");
 				}
-				// Fill mobUDPIP2sysUDPPortMap
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
             

@@ -98,49 +98,10 @@ public class ServerSockThread extends Thread {
 										sock.getOutputStream().write(1);
 										sock.getOutputStream().flush();
 									}
-									
-									//ExchangeFrame.sysIP2MobUdpPortMap.put(sysIP2, udpPort);
+									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
+									ExchangeFrame exhgFrame = new ExchangeFrame(sysLivefeedSock,sock,hashID);
+									exhgFrame.start();
 
-									while(true){
-										try{
-											int p = sock.getInputStream().read();
-											if (p == -1) break;
-											sock.getOutputStream().write(1);
-											sock.getOutputStream().flush();
-											
-											try {
-												Thread.sleep(2000);
-											} catch (InterruptedException e) {
-												e.printStackTrace();
-											}
-											
-										} catch (IOException e1) {
-											e1.printStackTrace();
-											break;
-										}
-									}
-									
-									System.out.println("Livefeed stopped!!!");
-									//ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
-									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
-									sysLivefeedSock.close();
-									InetSocketAddress mobUDP = Main.hashID2MobUDPMap.get(hashID);
-									InetAddress sysUDPIP = Main.mobUDPIP2sysUDPIPPortMap.get(mobUDP.getAddress());
-									Main.hashID2MobUDPMap.remove(hashID);
-									Main.mobUDPIP2sysUDPIPPortMap.remove(mobUDP.getAddress());
-									Main.sysUDPIP2mobUDPPortMap.remove(sysUDPIP);
-									Main.sysUDPIP2hashIDMap.remove(sysUDPIP);
-									Main.mobUDPIP2sysUDPPortMap.remove(mobUDP.getAddress());
-									Main.sysUDPIP2mobUDPListenPortMap.remove(sysUDPIP);
-									System.out.println("UDP IPs removed");
-									
-									
-									/*
-									System.out.println("Livefeed stopped weirdly!!!@@@@@@@@@@@@@@@@@@");
-									ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP2);
-									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
-									sysLivefeedSock.close();
-									*/
 								} catch (IOException e1) {
 									e1.printStackTrace();
 								}
@@ -196,11 +157,17 @@ public class ServerSockThread extends Thread {
 										}
 									}catch(IOException e){
 										System.out.println("Sending Audio stopped!!");
-										//ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(sock.getInetAddress());
-										InetAddress mobUDPIP = Main.hashID2MobUDPMap.get(hashID).getAddress();
-										Main.mobUDPIP2sysUDPPortMap.remove(mobUDPIP);
 										Socket sysAudioSock = sysIP2AudioSockMap.get(sysIP1);
 										sysAudioSock.close();
+										InetSocketAddress sysUDP = Main.hashID2SysUDPPortMap.get(hashID);
+										Main.hashID2SysUDPPortMap.remove(hashID);
+										
+										if(sysUDP != null){
+											InetAddress mobUDPIP = Main.sysUDPIP2mobUDPIPMap.get(sysUDP.getAddress());
+											Main.mobUDPIP2hashIDMap.remove(mobUDPIP);
+											Main.mobUDPIP2sysUDPPortMap.remove(mobUDPIP);
+											Main.sysUDPIP2mobUDPIPMap.remove(sysUDP.getAddress());
+										}
 										e.printStackTrace();
 										return;
 									}
@@ -269,8 +236,8 @@ public class ServerSockThread extends Thread {
 									Socket sysListenSock = sysIP2ListenSockMap.get(sysIP2);
 									sysListenSock.close();
 									InetSocketAddress modUDP = Main.hashID2MobUDPMap.get(hashID);
-									InetAddress sysUDPIP = Main.mobUDPIP2sysUDPIPPortMap.get(modUDP.getAddress());
-									Main.sysUDPIP2mobUDPListenPortMap.remove(sysUDPIP);
+									//InetAddress sysUDPIP = Main.mobUDPIP2sysUDPIPMap.get(modUDP.getAddress());
+									//Main.sysUDPIP2mobUDPListenPortMap.remove(sysUDPIP);
 									System.out.println("UDP IPs removed from LISTEN");
 				
 								} catch (IOException e1) {
