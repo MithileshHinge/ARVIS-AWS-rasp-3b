@@ -27,12 +27,12 @@ public class MobUDPListenRx extends Thread{
             try {
 				dsMob.receive(receivedPacket);
 				InetSocketAddress mobUDP = (InetSocketAddress) receivedPacket.getSocketAddress();
-				InetAddress mobUDPIP = mobUDP.getAddress();
-				/*InetAddress sysUDPIP = Main.mobUDPIP2sysUDPIPPortMap.get(mobUDPIP);
-				if(!Main.sysUDPIP2mobUDPListenPortMap.contains(sysUDPIP)){
-					Main.sysUDPIP2mobUDPListenPortMap.put(sysUDPIP, mobUDP);
-					System.out.println("MOBUDPListenRX ...................map entry done" + Main.sysUDPIP2mobUDPListenPortMap.keySet());
-				}*/
+				String hashID = new String(receivedPacket.getData()).trim();
+				//System.out.println("...........SysUDPPacketRx IP = .............." + sysUDP);
+				if(!Main.hashID2MobUDPPortMap.containsKey(hashID)){
+					Main.hashID2MobUDPPortMap.put(hashID,mobUDP);
+					System.out.println("...hashID 2 MobUDP FILLED... ");
+				}
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

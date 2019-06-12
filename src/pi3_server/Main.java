@@ -52,21 +52,24 @@ public class Main {
 			BYTE_LIGHT_CHANGE = 6;
 
 	public static ExchangeAudio exchangeAudio;
+	public static ExchangeListen exchangeListen;
 	//public static ConcurrentHashMap<String, MergeThread> mergeThreadsMap = new ConcurrentHashMap<>();
 	//public static ConcurrentHashMap<InetAddress, Socket> mobIP2connMobSock = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress, InetAddress> mobIP2sysIP = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress, InetAddress> sysIP2mobIP = new ConcurrentHashMap<InetAddress, InetAddress>();
 	public static ConcurrentHashMap<String, ConnectSysThread> connSysThreadsMap = new ConcurrentHashMap<>();
-	public static ConcurrentHashMap<String,InetSocketAddress> hashID2MobUDPMap = new ConcurrentHashMap<>();
-	public static ConcurrentHashMap<InetAddress,String> sysUDPIP2hashIDMap = new ConcurrentHashMap<>();
-	public static ConcurrentHashMap<InetAddress, InetSocketAddress> sysUDPIP2mobUDPPortMap = new ConcurrentHashMap<>();
-	public static ConcurrentHashMap<InetAddress, InetSocketAddress> sysUDPIP2mobUDPListenPortMap = new ConcurrentHashMap<>();
 	
 	//Sending Audio Port Maps
 	public static ConcurrentHashMap<InetAddress, String> mobUDPIP2hashIDMap = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<String, InetSocketAddress> hashID2SysUDPPortMap = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress, InetSocketAddress> mobUDPIP2sysUDPPortMap = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<InetAddress, InetAddress> sysUDPIP2mobUDPIPMap = new ConcurrentHashMap<>();
+	
+	//Listen Port Maps
+	public static ConcurrentHashMap<InetAddress,String> sysUDPIP2hashIDMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<String,InetSocketAddress> hashID2MobUDPPortMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetAddress, InetSocketAddress> sysUDPIP2mobUDPPortMap = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<InetAddress, InetAddress> mobUDPIP2sysUDPIPMap = new ConcurrentHashMap<>();
 	
 	//public static ConcurrentHashMap<String, String> hashID2emailID = new ConcurrentHashMap<>();
 	//public static ConcurrentHashMap<String, InetAddress> hashID2sysIPMap= new ConcurrentHashMap<>();
@@ -165,11 +168,13 @@ public class Main {
 		
 		try {
 			exchangeAudio = new ExchangeAudio();
+			exchangeListen = new ExchangeListen();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 			return;
 		}
 		exchangeAudio.start();
+		exchangeListen.start();
 		
 		while(true){
 			

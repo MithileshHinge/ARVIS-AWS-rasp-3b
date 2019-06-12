@@ -42,7 +42,7 @@ class ConnectMobThread extends Thread{
 					String password = dInMob.readUTF();
 					
 					if(Main.db.verifyUser(username, password, hashID)){
-						outMob.write(2);  //Verified
+						outMob.write(2);  //Verified //Authenticates mobile
 						outMob.flush();
 						break;
 					}else{
@@ -173,14 +173,15 @@ class ConnectMobThread extends Thread{
 		System.out.println(Main.ft.format(date)+"Mobile disconnected ");
 		InetAddress mobIP = connMobSock.getInetAddress();
 		System.out.println("IN ConnectMobThread mobIP : " + mobIP);
+		
+		// Alarm off byte
+		
 		if (mobIP != null){
 			
 			InetAddress sysIP = Main.mobIP2sysIP.get(mobIP);
-			System.out.print("sysIP : " + sysIP);
+			System.out.print("IN ConnectMobThread sysIP : " + sysIP);
 			if (sysIP != null){
 				Main.sysIP2mobIP.remove(sysIP);
-				//ExchangeFrame.sysIP2MobUdpPortMap.remove(sysIP);
-				//ExchangeAudio.mobIP2SysAudioUdpPortMap.remove(mobIP);
 			}	
 			if(hashID != null){
 				InetSocketAddress sysUDP = Main.hashID2SysUDPPortMap.get(hashID);
@@ -192,20 +193,18 @@ class ConnectMobThread extends Thread{
 					Main.mobUDPIP2sysUDPPortMap.remove(mobUDPIP);
 					Main.sysUDPIP2mobUDPIPMap.remove(sysUDP.getAddress());
 				}
-				/*InetSocketAddress mobUDP = Main.hashID2MobUDPMap.get(hashID);
-				Main.hashID2MobUDPMap.remove(hashID);
-				if(mobUDP != null){
-					InetAddress sysUDPIP = Main.mobUDPIP2sysUDPIPPortMap.get(mobUDP.getAddress());
-					Main.mobUDPIP2sysUDPIPPortMap.remove(mobUDP.getAddress());
-					Main.mobUDPIP2sysUDPPortMap.remove(mobUDP.getAddress());
-					if(sysUDPIP != null){
-						Main.sysUDPIP2mobUDPPortMap.remove(sysUDPIP);
-						Main.sysUDPIP2hashIDMap.remove(sysUDPIP);
-						Main.sysUDPIP2mobUDPListenPortMap.remove(sysUDPIP);
-					}
-				}*/
+				InetSocketAddress mobUDP = Main.hashID2MobUDPPortMap.get(hashID);
+				if(mobUDP!=null){
+					InetAddress mobUDPIP = mobUDP.getAddress();
+					Main.hashID2MobUDPPortMap.remove(hashID);
+					InetAddress sysUDPIP = Main.mobUDPIP2sysUDPIPMap.get(mobUDPIP);
+					Main.sysUDPIP2hashIDMap.remove(sysUDPIP);
+					Main.sysUDPIP2mobUDPPortMap.remove(sysUDPIP);
+					Main.mobUDPIP2sysUDPIPMap.remove(mobUDPIP);	
+				}
 			}
 			Main.mobIP2sysIP.remove(mobIP);
+			System.out.println("ConnectMobThread MAPS REMOVED");
 		}
 		try {
 			connMobSock.close();

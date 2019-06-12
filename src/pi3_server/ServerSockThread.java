@@ -98,6 +98,7 @@ public class ServerSockThread extends Thread {
 										sock.getOutputStream().write(1);
 										sock.getOutputStream().flush();
 									}
+									while(sysIP2LivefeedSockMap.get(sysIP2) == null){ }
 									Socket sysLivefeedSock = sysIP2LivefeedSockMap.get(sysIP2);
 									ExchangeFrame exhgFrame = new ExchangeFrame(sysLivefeedSock,sock,hashID);
 									exhgFrame.start();
@@ -235,9 +236,14 @@ public class ServerSockThread extends Thread {
 									System.out.println("Listen stopped!!!");
 									Socket sysListenSock = sysIP2ListenSockMap.get(sysIP2);
 									sysListenSock.close();
-									InetSocketAddress modUDP = Main.hashID2MobUDPMap.get(hashID);
-									//InetAddress sysUDPIP = Main.mobUDPIP2sysUDPIPMap.get(modUDP.getAddress());
-									//Main.sysUDPIP2mobUDPListenPortMap.remove(sysUDPIP);
+									InetAddress mobUDPIP = Main.hashID2MobUDPPortMap.get(hashID).getAddress();
+									Main.hashID2MobUDPPortMap.remove(hashID);
+									if(mobUDPIP!=null){
+										InetAddress sysUDPIP = Main.mobUDPIP2sysUDPIPMap.get(mobUDPIP);
+										Main.sysUDPIP2hashIDMap.remove(sysUDPIP);
+										Main.sysUDPIP2mobUDPPortMap.remove(sysUDPIP);
+										Main.mobUDPIP2sysUDPIPMap.remove(mobUDPIP);	
+									}
 									System.out.println("UDP IPs removed from LISTEN");
 				
 								} catch (IOException e1) {
